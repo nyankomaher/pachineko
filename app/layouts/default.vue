@@ -1,6 +1,6 @@
 <template>
   <div class="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
-    <main class="flex-1 overflow-y-auto pb-16">
+    <main class="flex flex-1 flex-col overflow-y-auto pb-16">
       <slot />
     </main>
     <nav class="fixed inset-x-0 bottom-0 flex border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">

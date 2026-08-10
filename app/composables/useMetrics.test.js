@@ -5,10 +5,10 @@ describe('useMetrics', () => {
     const { calcDeemedInvestment } = useMetrics()
     const result = calcDeemedInvestment({
       investment: 10000,
-      startMochidama: 500,
-      endMochidama: 200,
-      startKashidama: 0,
-      endKashidama: 0
+      startHeldBalls: 500,
+      endHeldBalls: 200,
+      startRentalBalls: 0,
+      endRentalBalls: 0
     })
     expect(result).toBe(10000 + (500 - 200) * 4)
   })

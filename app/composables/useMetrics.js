@@ -1,6 +1,6 @@
 export function useMetrics() {
-  function calcDeemedInvestment({ investment, startMochidama, endMochidama, startKashidama, endKashidama }) {
-    return investment + ((startMochidama - endMochidama) + (startKashidama - endKashidama)) * 4
+  function calcDeemedInvestment({ investment, startHeldBalls, endHeldBalls, startRentalBalls, endRentalBalls }) {
+    return investment + ((startHeldBalls - endHeldBalls) + (startRentalBalls - endRentalBalls)) * 4
   }
 
   function calcRotationsPer1000Yen(rotations, deemedInvestment) {

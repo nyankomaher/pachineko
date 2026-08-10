@@ -106,10 +106,12 @@ npm run test     # Vitestによるテスト実行
 前提：記録中セッションが存在しない
 
 1. TOP画面で記録開始ボタンを押下する
-1. 記録中セッションを生成
 1. 実績詳細画面に遷移
 1. 実績詳細画面で日付や店舗、台など各実績区間で変化しない情報を入力
-1. 実績詳細画面で記録開始ボタンを押下し、区間実績詳細画面に遷移
+1. 実績詳細画面で記録開始ボタンを押下
+1. 実績を生成
+1. 記録中セッションを生成
+1. 区間実績詳細画面に遷移
 
 ### 区間実績記録 / 実績記録終了
 
@@ -180,51 +182,61 @@ npm run test     # Vitestによるテスト実行
 
 # IndexedDB
 
-## 店舗
+テーブル名・フィールド名はDexie上では英語を用います（「持玉」→ heldBalls、「貸玉」→ rentalBalls として統一）。
 
-- ID(AutoIncrement)
-- 店舗名
+## halls（店舗）
 
-## 機種
+| 項目 | フィールド名 |
+|---|---|
+| ID(AutoIncrement) | id |
+| 店舗名 | name |
 
-- ID(AutoIncrement)
-- 機種名
+## machines（機種）
 
-## 実績
+| 項目 | フィールド名 |
+|---|---|
+| ID(AutoIncrement) | id |
+| 機種名 | name |
 
-- ID(AutoIncrement)
-- 日付
-- 店舗ID(Index)
-- 機種ID(Index)
-- 台番号
-- 開始時刻
-- 終了時刻
-- 総投資金額
-- 総投資持玉
-- 最終持玉
-- 総回転数
-- 総1000円あたり回転数
-- ST当選数
-- 通常当選数
-- チャージ当選数
-- 総ST継続数
-- 総獲得玉数
+## records（実績）
 
-## 区間実績
+| 項目 | フィールド名 |
+|---|---|
+| ID(AutoIncrement) | id |
+| 日付 | date |
+| 店舗ID(Index) | hallId |
+| 機種ID(Index) | machineId |
+| 台番号 | machineNumber |
+| 開始時刻 | startTime |
+| 終了時刻 | endTime |
+| 総投資金額 | totalInvestment |
+| 総投資持玉 | totalInvestedBalls |
+| 最終持玉 | finalHeldBalls |
+| 総回転数 | totalRotations |
+| 総1000円あたり回転数 | totalRotationsPer1000Yen |
+| ST当選数 | stWinCount |
+| 通常当選数 | normalWinCount |
+| チャージ当選数 | chargeWinCount |
+| 総ST継続数 | totalStContinueCount |
+| 総獲得玉数 | totalWonBalls |
 
-- ID(AutoIncrement)
-- 実績ID(Index)
-- 開始時刻
-- 終了時刻
-- 投資金額
-- 開始持玉
-- 終了持玉
-- 開始貸玉
-- 終了貸玉
-- 開始回転数
-- 終了回転数
-- 当選種別
-- ST継続数
-- 獲得玉数
-- 当選後持玉
-- 当選後貸玉
+## periods（区間実績）
+
+| 項目 | フィールド名 |
+|---|---|
+| ID(AutoIncrement) | id |
+| 実績ID(Index) | recordId |
+| 開始時刻 | startTime |
+| 終了時刻 | endTime |
+| 投資金額 | investment |
+| 開始持玉 | startHeldBalls |
+| 終了持玉 | endHeldBalls |
+| 開始貸玉 | startRentalBalls |
+| 終了貸玉 | endRentalBalls |
+| 開始回転数 | startRotations |
+| 終了回転数 | endRotations |
+| 当選種別 | winType |
+| ST継続数 | stContinueCount |
+| 獲得玉数 | wonBalls |
+| 当選後持玉 | postWinHeldBalls |
+| 当選後貸玉 | postWinRentalBalls |
