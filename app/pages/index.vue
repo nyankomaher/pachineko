@@ -40,6 +40,7 @@
 import { NuxtLink } from '#components'
 
 const recordingSession = useRecordingSessionStore()
+const { formatRotationsPer1000Yen, formatElapsedTime } = useMetrics()
 
 const record = ref(null)
 const machineName = ref('')
@@ -59,19 +60,9 @@ async function loadRecord() {
     : ''
 }
 
-const elapsedTimeLabel = computed(() => {
-  if (!record.value?.startTime) return ''
-  const diffMs = now.value.getTime() - new Date(record.value.startTime).getTime()
-  const totalMinutes = Math.max(0, Math.floor(diffMs / 60000))
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  return hours > 0 ? `${hours}時間${minutes}分` : `${minutes}分`
-})
+const elapsedTimeLabel = computed(() => formatElapsedTime(record.value?.startTime, now.value))
 
-const formattedRotationsPer1000Yen = computed(() => {
-  const value = record.value?.totalRotationsPer1000Yen
-  return typeof value === 'number' ? value.toFixed(1) : '0.0'
-})
+const formattedRotationsPer1000Yen = computed(() => formatRotationsPer1000Yen(record.value?.totalRotationsPer1000Yen))
 
 onMounted(() => {
   loadRecord()

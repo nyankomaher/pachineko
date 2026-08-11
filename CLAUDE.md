@@ -56,6 +56,12 @@ UC1で記録したデータを一覧で表示する。
   Storeに格納するほか、LocalStorageにも格納してブラウザ終了時にもデータが保持されるようにする。
   これが存在する場合、記録中とみなす。
 
+当選種別
+: 当選した場合、一度区間実績を区切ることが想定されており、その当選がST/通常/チャージのいずれであったかを記録する。
+  当選によらない区切りの場合、「なし」を記録する。
+  DB上はIDで管理し、表示名は定数として定義する。
+
+
 ## コマンド
 
 ```bash
@@ -217,7 +223,7 @@ npm run test     # Vitestによるテスト実行
 | ST当選数 | stWinCount |
 | 通常当選数 | normalWinCount |
 | チャージ当選数 | chargeWinCount |
-| 総ST継続数 | totalStContinueCount |
+| 総連荘数 | totalContinueCount |
 | 総獲得玉数 | totalWonBalls |
 
 ## periods（区間実績）
@@ -236,7 +242,7 @@ npm run test     # Vitestによるテスト実行
 | 開始回転数 | startRotations |
 | 終了回転数 | endRotations |
 | 当選種別 | winType |
-| ST継続数 | stContinueCount |
+| 連荘数 | continueCount |
 | 獲得玉数 | wonBalls |
 | 当選後持玉 | postWinHeldBalls |
 | 当選後貸玉 | postWinRentalBalls |
