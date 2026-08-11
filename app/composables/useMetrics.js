@@ -4,7 +4,7 @@ export function useMetrics() {
   }
 
   function calcRotationsPer1000Yen(rotations, deemedInvestment) {
-    if (deemedInvestment <= 0) return 0
+    if (deemedInvestment <= 0 || rotations <= 0) return 0
     return rotations / (deemedInvestment / 1000)
   }
 
@@ -21,5 +21,36 @@ export function useMetrics() {
     return hours > 0 ? `${hours}時間${minutes}分` : `${minutes}分`
   }
 
-  return { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime }
+  function calcRecordAggregates(periods) {
+    const totals = {
+      totalInvestment: 0,
+      totalInvestedBalls: 0,
+      finalHeldBalls: 0,
+      totalRotations: 0,
+      rushWinCount: 0,
+      normalWinCount: 0,
+      chargeWinCount: 0,
+      totalContinueCount: 0,
+      totalWonBalls: 0
+    }
+
+    for (const period of periods) {
+      totals.totalInvestment += period.investment
+      totals.totalInvestedBalls += (period.startHeldBalls - period.endHeldBalls) + (period.startRentalBalls - period.endRentalBalls)
+      totals.totalRotations += period.endRotations - period.startRotations
+      totals.finalHeldBalls = period.endHeldBalls
+      totals.totalContinueCount += period.continueCount
+      totals.totalWonBalls += period.wonBalls
+      if (period.winType === 'rush') totals.rushWinCount += 1
+      else if (period.winType === 'normal') totals.normalWinCount += 1
+      else if (period.winType === 'charge') totals.chargeWinCount += 1
+    }
+
+    const deemedInvestment = totals.totalInvestment + totals.totalInvestedBalls * 4
+    totals.totalRotationsPer1000Yen = calcRotationsPer1000Yen(totals.totalRotations, deemedInvestment)
+
+    return totals
+  }
+
+  return { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates }
 }

@@ -25,7 +25,7 @@ async function handleCreate(basicInfo) {
       finalHeldBalls: 0,
       totalRotations: 0,
       totalRotationsPer1000Yen: 0,
-      stWinCount: 0,
+      rushWinCount: 0,
       normalWinCount: 0,
       chargeWinCount: 0,
       totalContinueCount: 0,

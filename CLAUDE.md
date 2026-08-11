@@ -57,7 +57,7 @@ UC1で記録したデータを一覧で表示する。
   これが存在する場合、記録中とみなす。
 
 当選種別
-: 当選した場合、一度区間実績を区切ることが想定されており、その当選がST/通常/チャージのいずれであったかを記録する。
+: 当選した場合、一度区間実績を区切ることが想定されており、その当選がRUSH/通常/チャージのいずれであったかを記録する。
   当選によらない区切りの場合、「なし」を記録する。
   DB上はIDで管理し、表示名は定数として定義する。
 
@@ -220,7 +220,7 @@ npm run test     # Vitestによるテスト実行
 | 最終持玉 | finalHeldBalls |
 | 総回転数 | totalRotations |
 | 総1000円あたり回転数 | totalRotationsPer1000Yen |
-| ST当選数 | stWinCount |
+| RUSH当選数 | rushWinCount |
 | 通常当選数 | normalWinCount |
 | チャージ当選数 | chargeWinCount |
 | 総連荘数 | totalContinueCount |

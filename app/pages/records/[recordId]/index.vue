@@ -28,8 +28,8 @@
           <dd>{{ record.totalRotations }}回転</dd>
           <dt class="text-zinc-500">1000円あたり回転数</dt>
           <dd>{{ formattedRotationsPer1000Yen }}回転</dd>
-          <dt class="text-zinc-500">ST当選数</dt>
-          <dd>{{ record.stWinCount }}</dd>
+          <dt class="text-zinc-500">RUSH当選数</dt>
+          <dd>{{ record.rushWinCount }}</dd>
           <dt class="text-zinc-500">通常当選数</dt>
           <dd>{{ record.normalWinCount }}</dd>
           <dt class="text-zinc-500">チャージ当選数</dt>
@@ -62,15 +62,20 @@
           <Column header="1000円あたり回転数">
             <template #body="{ data }">{{ periodRotationsPer1000Yen(data).toFixed(1) }}回転</template>
           </Column>
-          <Column field="winType" header="当選種別" />
+          <Column header="当選種別">
+            <template #body="{ data }">{{ getWinTypeLabel(data.winType) }}</template>
+          </Column>
           <Column field="continueCount" header="連荘数" />
         </DataTable>
       </section>
 
-      <section class="flex flex-wrap gap-2">
-        <Button v-if="state === 'A'" label="記録再開" @click="handleResumeFromNone" />
-        <Button v-if="state === 'B' || state === 'C'" :label="resumeLabel" @click="goToNewPeriod" />
-        <Button v-if="state === 'C'" label="記録終了" severity="danger" outlined @click="handleEndSession" />
+      <section class="flex flex-col gap-2">
+        <div class="flex flex-wrap gap-2">
+          <Button v-if="state === 'A'" label="記録再開" @click="handleResumeFromNone" />
+          <Button v-if="state === 'B' || state === 'C'" :label="resumeLabel" @click="goToNewPeriod" />
+          <Button v-if="state === 'C'" label="記録終了" severity="danger" outlined @click="handleEndSession" />
+        </div>
+        <p v-if="endError" class="text-sm text-red-500">{{ endError }}</p>
       </section>
 
       <section class="pt-4">
@@ -93,6 +98,7 @@ const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()
 const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime } = useMetrics()
+const { getWinTypeLabel } = useWinTypes()
 
 const record = ref(null)
 const periods = ref([])
@@ -101,6 +107,7 @@ const machineName = ref('')
 const now = ref(new Date())
 const updating = ref(false)
 const deleteDialogVisible = ref(false)
+const endError = ref('')
 let timer = null
 
 async function loadRecord() {
@@ -200,6 +207,12 @@ async function goToNewPeriod() {
 }
 
 function handleEndSession() {
+  const last = periods.value[periods.value.length - 1]
+  if (last && last.endRentalBalls !== 0) {
+    endError.value = '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
+    return
+  }
+  endError.value = ''
   recordingSession.end()
 }
 

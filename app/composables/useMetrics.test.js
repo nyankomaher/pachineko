@@ -53,4 +53,67 @@ describe('useMetrics', () => {
     const { formatElapsedTime } = useMetrics()
     expect(formatElapsedTime(null, new Date())).toBe('')
   })
+
+  it('calcRecordAggregates: 複数区間・当選種別混在を合算する', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const periods = [
+      {
+        investment: 5000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 500,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      },
+      {
+        investment: 3000,
+        startHeldBalls: 0,
+        endHeldBalls: 200,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 500,
+        endRotations: 700,
+        winType: 'rush',
+        continueCount: 3,
+        wonBalls: 1500
+      },
+      {
+        investment: 0,
+        startHeldBalls: 1500,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 300,
+        winType: 'charge',
+        continueCount: 0,
+        wonBalls: 0
+      }
+    ]
+
+    const result = calcRecordAggregates(periods)
+
+    expect(result.totalInvestment).toBe(8000)
+    expect(result.totalInvestedBalls).toBe(1300)
+    expect(result.finalHeldBalls).toBe(0)
+    expect(result.totalRotations).toBe(1000)
+    expect(result.rushWinCount).toBe(1)
+    expect(result.normalWinCount).toBe(0)
+    expect(result.chargeWinCount).toBe(1)
+    expect(result.totalContinueCount).toBe(3)
+    expect(result.totalWonBalls).toBe(1500)
+    expect(result.totalRotationsPer1000Yen).toBeCloseTo(1000 / (13200 / 1000))
+  })
+
+  it('calcRecordAggregates: 区間実績が無ければ全て0を返す', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const result = calcRecordAggregates([])
+    expect(result.totalInvestment).toBe(0)
+    expect(result.totalRotations).toBe(0)
+    expect(result.totalRotationsPer1000Yen).toBe(0)
+  })
 })

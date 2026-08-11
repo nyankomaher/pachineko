@@ -5,3 +5,9 @@
 body {
   @apply text-zinc-900 dark:text-zinc-100;
 }
+
+.p-button:disabled,
+.p-button.p-disabled {
+  opacity: 0.4 !important;
+  filter: grayscale(1);
+}
