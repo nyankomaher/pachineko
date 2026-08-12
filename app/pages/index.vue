@@ -24,9 +24,9 @@
             <dt class="text-zinc-500">経過時間</dt>
             <dd>{{ elapsedTimeLabel }}</dd>
             <dt class="text-zinc-500">投資金額</dt>
-            <dd>{{ record?.totalInvestment }}円</dd>
+            <dd>{{ formatNumber(record?.totalInvestment) }}円</dd>
             <dt class="text-zinc-500">回転数</dt>
-            <dd>{{ record?.totalRotations }}回転</dd>
+            <dd>{{ formatNumber(record?.totalRotations) }}回転</dd>
             <dt class="text-zinc-500">1000円あたり回転数</dt>
             <dd>{{ formattedRotationsPer1000Yen }}回転</dd>
           </dl>
@@ -41,6 +41,7 @@ import { NuxtLink } from '#components'
 
 const recordingSession = useRecordingSessionStore()
 const { formatRotationsPer1000Yen, formatElapsedTime } = useMetrics()
+const { formatNumber } = useFormat()
 
 const record = ref(null)
 const machineName = ref('')

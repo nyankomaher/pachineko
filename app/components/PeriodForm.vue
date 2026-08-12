@@ -58,19 +58,19 @@
     <section class="flex flex-col gap-2 rounded border border-zinc-200 p-3 text-sm dark:border-zinc-800">
       <div class="flex justify-between">
         <span class="text-zinc-500">みなし投資金額</span>
-        <span>{{ periodDeemedInvestment }}円</span>
+        <span>{{ formatNumber(periodDeemedInvestment) }}円</span>
       </div>
       <div class="flex justify-between">
         <span class="text-zinc-500">回転数</span>
-        <span>{{ periodRotations }}回転 ({{ formatRotationsPer1000Yen(periodRotationsPer1000Yen) }}回転)</span>
+        <span>{{ formatNumber(periodRotations) }}回転 ({{ formatRotationsPer1000Yen(periodRotationsPer1000Yen) }}回転)</span>
       </div>
       <div class="flex justify-between">
         <span class="text-zinc-500">総投資金額</span>
-        <span>{{ cumulativeInvestment }}円</span>
+        <span>{{ formatNumber(cumulativeInvestment) }}円</span>
       </div>
       <div class="flex justify-between">
         <span class="text-zinc-500">総回転数</span>
-        <span>{{ cumulativeRotations }}回転 ({{ formatRotationsPer1000Yen(cumulativeRotationsPer1000Yen) }}回転)</span>
+        <span>{{ formatNumber(cumulativeRotations) }}回転 ({{ formatRotationsPer1000Yen(cumulativeRotationsPer1000Yen) }}回転)</span>
       </div>
     </section>
 
@@ -130,6 +130,7 @@ const emit = defineEmits(['submit'])
 
 const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen } = useMetrics()
 const { winTypes } = useWinTypes()
+const { formatNumber } = useFormat()
 
 function parseDateTime(value) {
   return value ? new Date(value) : null

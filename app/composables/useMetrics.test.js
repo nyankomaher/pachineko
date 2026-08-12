@@ -116,4 +116,31 @@ describe('useMetrics', () => {
     expect(result.totalRotations).toBe(0)
     expect(result.totalRotationsPer1000Yen).toBe(0)
   })
+
+  it('validateRentalBallsForEnd: 区間実績が無ければエラーなし', () => {
+    const { validateRentalBallsForEnd } = useMetrics()
+    expect(validateRentalBallsForEnd(null)).toBeNull()
+  })
+
+  it('validateRentalBallsForEnd: 当選後貸玉が未入力で終了貸玉が0でなければ終了貸玉のエラーを返す', () => {
+    const { validateRentalBallsForEnd } = useMetrics()
+    const error = validateRentalBallsForEnd({ endRentalBalls: 5, postWinRentalBalls: null })
+    expect(error).toBe('終了貸玉が0ではないため終了できません。区間実績を修正してください。')
+  })
+
+  it('validateRentalBallsForEnd: 当選後貸玉が入力されていれば終了貸玉が0でなくてもそちらを優先して判定する', () => {
+    const { validateRentalBallsForEnd } = useMetrics()
+    expect(validateRentalBallsForEnd({ endRentalBalls: 5, postWinRentalBalls: 0 })).toBeNull()
+  })
+
+  it('validateRentalBallsForEnd: 当選後貸玉が入力されていて0でなければ当選後貸玉のエラーを返す', () => {
+    const { validateRentalBallsForEnd } = useMetrics()
+    const error = validateRentalBallsForEnd({ endRentalBalls: 0, postWinRentalBalls: 3 })
+    expect(error).toBe('当選後貸玉が0ではないため終了できません。区間実績を修正してください。')
+  })
+
+  it('validateRentalBallsForEnd: 終了貸玉・当選後貸玉ともに0ならエラーなし', () => {
+    const { validateRentalBallsForEnd } = useMetrics()
+    expect(validateRentalBallsForEnd({ endRentalBalls: 0, postWinRentalBalls: null })).toBeNull()
+  })
 })

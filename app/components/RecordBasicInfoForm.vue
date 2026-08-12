@@ -1,52 +1,61 @@
 <template>
   <div class="flex flex-col gap-4">
-    <div class="flex flex-col gap-1">
-      <label for="record-date">日付</label>
-      <DatePicker id="record-date" v-model="date" date-format="yy-mm-dd" show-icon />
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1">
+        <label for="record-date">日付</label>
+        <DatePicker id="record-date" v-model="date" date-format="yy-mm-dd" show-icon fluid />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="record-hall">店舗</label>
+        <AutoComplete
+          id="record-hall"
+          v-model="hallInput"
+          :suggestions="hallSuggestions"
+          option-label="name"
+          dropdown
+          fluid
+          placeholder="店舗名を入力"
+          @complete="searchHalls"
+        />
+      </div>
     </div>
 
-    <div class="flex flex-col gap-1">
-      <label for="record-hall">店舗</label>
-      <AutoComplete
-        id="record-hall"
-        v-model="hallInput"
-        :suggestions="hallSuggestions"
-        option-label="name"
-        dropdown
-        placeholder="店舗名を入力"
-        @complete="searchHalls"
-      />
+    <div class="grid grid-cols-[3fr_1fr] gap-4">
+      <div class="flex flex-col gap-1">
+        <label for="record-machine">機種</label>
+        <AutoComplete
+          id="record-machine"
+          v-model="machineInput"
+          :suggestions="machineSuggestions"
+          option-label="name"
+          dropdown
+          fluid
+          placeholder="機種名を入力"
+          @complete="searchMachines"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="record-machine-number">台番号</label>
+        <InputText id="record-machine-number" v-model="machineNumber" placeholder="台番号" fluid />
+      </div>
     </div>
 
-    <div class="flex flex-col gap-1">
-      <label for="record-machine">機種</label>
-      <AutoComplete
-        id="record-machine"
-        v-model="machineInput"
-        :suggestions="machineSuggestions"
-        option-label="name"
-        dropdown
-        placeholder="機種名を入力"
-        @complete="searchMachines"
-      />
-    </div>
+    <div class="grid grid-cols-2 gap-4">
+      <div class="flex flex-col gap-1">
+        <label for="record-start-time">開始時刻</label>
+        <DatePicker id="record-start-time" v-model="startTime" time-only hour-format="24" show-icon fluid />
+      </div>
 
-    <div class="flex flex-col gap-1">
-      <label for="record-machine-number">台番号</label>
-      <InputText id="record-machine-number" v-model="machineNumber" placeholder="台番号を入力" />
-    </div>
-
-    <div class="flex flex-col gap-1">
-      <label for="record-start-time">開始時刻</label>
-      <DatePicker id="record-start-time" v-model="startTime" show-time hour-format="24" date-format="yy-mm-dd" show-icon />
-    </div>
-
-    <div class="flex flex-col gap-1">
-      <label for="record-end-time">終了時刻</label>
-      <DatePicker id="record-end-time" v-model="endTime" show-time hour-format="24" date-format="yy-mm-dd" show-icon />
+      <div class="flex flex-col gap-1">
+        <label for="record-end-time">終了時刻</label>
+        <DatePicker id="record-end-time" v-model="endTime" time-only hour-format="24" show-icon fluid :disabled="recording" />
+      </div>
     </div>
 
     <Button
+      class="mt-2"
       :label="submitLabel"
       :loading="loading || submitting"
       :disabled="!isValid || loading || submitting"

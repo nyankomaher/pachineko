@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col gap-6 p-4">
-    <h1 class="text-xl font-bold">実績詳細</h1>
+    <h1 class="text-xl font-bold">実績詳細{{ isOwnSession ? '（記録中）' : '' }}</h1>
 
     <template v-if="record">
       <section>
@@ -19,25 +19,23 @@
           <dt class="text-zinc-500">経過時間</dt>
           <dd>{{ elapsedTimeLabel }}</dd>
           <dt class="text-zinc-500">投資金額</dt>
-          <dd>{{ record.totalInvestment }}円</dd>
+          <dd>{{ formatNumber(record.totalInvestment) }}円</dd>
           <dt class="text-zinc-500">投資持玉</dt>
-          <dd>{{ record.totalInvestedBalls }}</dd>
+          <dd>{{ formatNumber(record.totalInvestedBalls) }}玉</dd>
           <dt class="text-zinc-500">最終持玉</dt>
-          <dd>{{ record.finalHeldBalls }}</dd>
+          <dd>{{ formatNumber(record.finalHeldBalls) }}玉</dd>
           <dt class="text-zinc-500">回転数</dt>
-          <dd>{{ record.totalRotations }}回転</dd>
-          <dt class="text-zinc-500">1000円あたり回転数</dt>
-          <dd>{{ formattedRotationsPer1000Yen }}回転</dd>
+          <dd>{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
           <dt class="text-zinc-500">RUSH当選数</dt>
-          <dd>{{ record.rushWinCount }}</dd>
+          <dd>{{ formatNumber(record.rushWinCount) }}</dd>
           <dt class="text-zinc-500">通常当選数</dt>
-          <dd>{{ record.normalWinCount }}</dd>
+          <dd>{{ formatNumber(record.normalWinCount) }}</dd>
           <dt class="text-zinc-500">チャージ当選数</dt>
-          <dd>{{ record.chargeWinCount }}</dd>
+          <dd>{{ formatNumber(record.chargeWinCount) }}</dd>
           <dt class="text-zinc-500">連荘数</dt>
-          <dd>{{ record.totalContinueCount }}</dd>
+          <dd>{{ formatNumber(record.totalContinueCount) }}</dd>
           <dt class="text-zinc-500">獲得玉数</dt>
-          <dd>{{ record.totalWonBalls }}</dd>
+          <dd>{{ formatNumber(record.totalWonBalls) }}玉</dd>
         </dl>
       </section>
 
@@ -46,39 +44,56 @@
         <DataTable
           :value="periods"
           data-key="id"
-          class="cursor-pointer"
-          :table-style="{ minWidth: '40rem' }"
+          class="periods-table cursor-pointer"
           @row-click="goToPeriod"
         >
-          <Column header="時間帯">
-            <template #body="{ data }">{{ formatTimeRange(data) }}</template>
+          <Column header="時間">
+            <template #body="{ data }">
+              <div class="flex flex-col">
+                <span>{{ formatTime(data.startTime) }}</span>
+                <span>{{ formatTime(data.endTime) }}</span>
+              </div>
+            </template>
           </Column>
-          <Column header="投資金額">
-            <template #body="{ data }">{{ data.investment }}円</template>
+          <Column header="投資">
+            <template #body="{ data }">
+              <div class="flex flex-col text-right">
+                <span>{{ formatNumber(data.investment) }}円</span>
+                <span>{{ formatNumber(periodBallsDiff(data)) }}玉</span>
+              </div>
+            </template>
           </Column>
-          <Column header="回転数">
-            <template #body="{ data }">{{ data.endRotations - data.startRotations }}回転</template>
+          <Column header="回転">
+            <template #body="{ data }">
+              <div class="flex flex-col text-right">
+                <span>{{ formatNumber(data.endRotations - data.startRotations) }}</span>
+                <span>{{ formatRotationsPer1000Yen(periodRotationsPer1000Yen(data)) }}</span>
+              </div>
+            </template>
           </Column>
-          <Column header="1000円あたり回転数">
-            <template #body="{ data }">{{ periodRotationsPer1000Yen(data).toFixed(1) }}回転</template>
+          <Column header="当選">
+            <template #body="{ data }">
+              <div class="flex flex-col">
+                <span>{{ getWinTypeLabel(data.winType) }}</span>
+                <span v-if="winContinueLabel(data)">{{ winContinueLabel(data) }}</span>
+              </div>
+            </template>
           </Column>
-          <Column header="当選種別">
-            <template #body="{ data }">{{ getWinTypeLabel(data.winType) }}</template>
-          </Column>
-          <Column field="continueCount" header="連荘数" />
         </DataTable>
       </section>
 
       <section class="flex flex-col gap-2">
         <div class="flex flex-wrap gap-2">
           <Button v-if="state === 'A'" label="記録再開" @click="handleResumeFromNone" />
-          <Button v-if="state === 'B' || state === 'C'" :label="resumeLabel" @click="goToNewPeriod" />
+          <Button v-if="state === 'B'" label="記録開始" @click="goToNewPeriod" />
+          <Button v-if="state === 'C'" label="記録継続" @click="goToNewPeriod" />
           <Button v-if="state === 'C'" label="記録終了" severity="danger" outlined @click="handleEndSession" />
         </div>
         <p v-if="endError" class="text-sm text-red-500">{{ endError }}</p>
       </section>
 
-      <section class="pt-4">
+      <section class="flex justify-between pt-4">
+        <Button label="戻る" text @click="goToList" />
         <Button label="削除" severity="danger" outlined @click="deleteDialogVisible = true" />
       </section>
     </template>
@@ -97,8 +112,9 @@
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()
-const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime } = useMetrics()
+const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, validateRentalBallsForEnd } = useMetrics()
 const { getWinTypeLabel } = useWinTypes()
+const { formatNumber } = useFormat()
 
 const record = ref(null)
 const periods = ref([])
@@ -165,7 +181,6 @@ const state = computed(() => {
   if (isOtherSession.value) return 'D'
   return periods.value.length === 0 ? 'B' : 'C'
 })
-const resumeLabel = computed(() => (state.value === 'B' ? '記録開始' : '記録再開'))
 
 const elapsedTimeLabel = computed(() => {
   const end = record.value?.endTime ? new Date(record.value.endTime) : now.value
@@ -185,16 +200,28 @@ function periodRotationsPer1000Yen(period) {
   return calcRotationsPer1000Yen(period.endRotations - period.startRotations, deemed)
 }
 
-function formatTimeRange(period) {
-  const format = (iso) => {
-    const d = new Date(iso)
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-  }
-  return period.endTime ? `${format(period.startTime)}〜${format(period.endTime)}` : `${format(period.startTime)}〜`
+function periodBallsDiff(period) {
+  return (period.startHeldBalls - period.endHeldBalls) + (period.startRentalBalls - period.endRentalBalls)
+}
+
+function winContinueLabel(period) {
+  if (period.winType === 'none') return ''
+  if ((period.winType === 'charge' || period.winType === 'normal') && period.continueCount <= 1) return ''
+  return `${period.continueCount}連`
+}
+
+function formatTime(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
 async function goToPeriod(event) {
   await navigateTo(`/records/${recordId}/${event.data.id}`)
+}
+
+async function goToList() {
+  await navigateTo('/records/')
 }
 
 async function handleResumeFromNone() {
@@ -206,14 +233,16 @@ async function goToNewPeriod() {
   await navigateTo(`/records/${recordId}/create`)
 }
 
-function handleEndSession() {
+async function handleEndSession() {
   const last = periods.value[periods.value.length - 1]
-  if (last && last.endRentalBalls !== 0) {
-    endError.value = '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
+  const error = validateRentalBallsForEnd(last)
+  if (error) {
+    endError.value = error
     return
   }
   endError.value = ''
-  recordingSession.end()
+  await recordingSession.finishRecording(recordId)
+  await navigateTo('/')
 }
 
 async function handleUpdate(basicInfo) {
@@ -243,3 +272,11 @@ async function handleDelete() {
   }
 }
 </script>
+
+<style scoped>
+@media (min-width: 1024px) {
+  :deep(.periods-table .p-datatable-table) {
+    width: auto;
+  }
+}
+</style>

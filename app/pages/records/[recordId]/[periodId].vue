@@ -11,7 +11,8 @@
       @submit="handleUpdate"
     />
 
-    <div class="mt-4">
+    <div class="mt-6 flex justify-between">
+      <Button label="戻る" text @click="goToRecord" />
       <Button label="削除" severity="danger" outlined @click="deleteDialogVisible = true" />
     </div>
 
@@ -51,6 +52,10 @@ async function load() {
 }
 
 onMounted(load)
+
+async function goToRecord() {
+  await navigateTo(`/records/${recordId}`)
+}
 
 const baselineTotals = computed(() => {
   if (!record.value || !period.value) return null

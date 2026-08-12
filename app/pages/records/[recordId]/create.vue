@@ -12,7 +12,7 @@
       @submit="handleSave"
     />
 
-    <div class="mt-4">
+    <div class="mt-6">
       <Button label="キャンセル" severity="secondary" outlined @click="cancelDialogVisible = true" />
     </div>
 
@@ -39,7 +39,7 @@
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()
-const { calcRecordAggregates } = useMetrics()
+const { calcRecordAggregates, validateRentalBallsForEnd } = useMetrics()
 
 const record = ref(null)
 const periodDefaults = ref(null)
@@ -124,8 +124,9 @@ async function handleContinue() {
 }
 
 async function handleEnd() {
-  if (pendingPeriodData.value?.endRentalBalls !== 0) {
-    endError.value = '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
+  const error = validateRentalBallsForEnd(pendingPeriodData.value)
+  if (error) {
+    endError.value = error
     return
   }
   ending.value = true
@@ -137,7 +138,7 @@ async function handleEnd() {
     await db.records.update(recordId, aggregates)
     pendingPeriodData.value = null
     continueDialogVisible.value = false
-    recordingSession.end()
+    await recordingSession.finishRecording(recordId)
     await navigateTo(`/records/${recordId}`)
   } finally {
     ending.value = false

@@ -22,6 +22,12 @@ export const useRecordingSessionStore = defineStore('recordingSession', {
       this.persist()
     },
 
+    async finishRecording(recordId) {
+      const db = useDb()
+      await db.records.update(recordId, { endTime: new Date().toISOString() })
+      this.end()
+    },
+
     hydrate() {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) return

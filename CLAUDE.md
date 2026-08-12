@@ -86,6 +86,7 @@ npm run test     # Vitestによるテスト実行
 - TypeScriptは使用せず、Javascriptを使用します。
 - CSSにはTailwindを使用します。
 - PWA化します(`@vite-pwa/nuxt` 経由で導入)。ホーム画面に追加してアプリのように起動できるようにします。
+- 画面にラベルと共に数値を表示する箇所(入力フォームのフィールドを除く)は、`useFormat()` の `formatNumber` を使い3桁ごとにカンマ区切りで表示します。
 
 # 仕様ドキュメント
 

@@ -52,5 +52,15 @@ export function useMetrics() {
     return totals
   }
 
-  return { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates }
+  function validateRentalBallsForEnd(period) {
+    if (!period) return null
+    const usesPostWin = period.postWinRentalBalls != null
+    const finalRentalBalls = usesPostWin ? period.postWinRentalBalls : period.endRentalBalls
+    if (finalRentalBalls === 0) return null
+    return usesPostWin
+      ? '当選後貸玉が0ではないため終了できません。区間実績を修正してください。'
+      : '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
+  }
+
+  return { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, validateRentalBallsForEnd }
 }
