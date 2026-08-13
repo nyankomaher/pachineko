@@ -1,5 +1,5 @@
 <template>
-  <div class="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+  <div class="flex h-screen flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
     <main class="flex flex-1 flex-col overflow-y-auto pb-16">
       <slot />
     </main>
