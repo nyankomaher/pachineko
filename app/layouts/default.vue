@@ -1,23 +1,46 @@
 <template>
   <div class="flex h-screen flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
-    <main class="flex flex-1 flex-col overflow-y-auto pb-16">
+    <Button
+      class="fixed right-4 top-4 z-[2000]"
+      rounded
+      text
+      severity="secondary"
+      aria-label="メニュー"
+      @click="navVisible = !navVisible"
+    >
+      <template #icon>
+        <TimesIcon v-if="navVisible" />
+        <BarsIcon v-else />
+      </template>
+    </Button>
+
+    <main class="flex flex-1 flex-col overflow-y-auto">
       <slot />
     </main>
-    <nav class="fixed inset-x-0 bottom-0 flex border-t border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-      <NuxtLink
-        v-for="tab in tabs"
-        :key="tab.to"
-        :to="tab.to"
-        class="flex flex-1 flex-col items-center gap-1 py-2 text-xs text-zinc-500 dark:text-zinc-400"
-        active-class="text-primary-500 dark:text-primary-400"
-      >
-        <span>{{ tab.label }}</span>
-      </NuxtLink>
-    </nav>
+
+    <Drawer v-model:visible="navVisible" position="left" header="メニュー" class="w-64">
+      <nav class="flex flex-col gap-1">
+        <NuxtLink
+          v-for="tab in tabs"
+          :key="tab.to"
+          :to="tab.to"
+          class="rounded px-3 py-2 text-zinc-700 dark:text-zinc-300"
+          active-class="font-semibold text-[var(--p-primary-color)]"
+          @click="navVisible = false"
+        >
+          {{ tab.label }}
+        </NuxtLink>
+      </nav>
+    </Drawer>
   </div>
 </template>
 
 <script setup>
+import BarsIcon from '@primevue/icons/bars'
+import TimesIcon from '@primevue/icons/times'
+
+const navVisible = ref(false)
+
 const tabs = [
   { to: '/', label: 'TOP' },
   { to: '/records/', label: '履歴' },
