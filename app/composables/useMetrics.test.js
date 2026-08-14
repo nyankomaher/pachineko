@@ -109,6 +109,52 @@ describe('useMetrics', () => {
     expect(result.totalRotationsPer1000Yen).toBeCloseTo(1000 / (13200 / 1000))
   })
 
+  it('calcRecordAggregates: 最後の区間実績に当選後持玉が入力されていれば最終持玉に優先反映する', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const periods = [
+      {
+        investment: 1000,
+        startHeldBalls: 0,
+        endHeldBalls: 100,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'rush',
+        continueCount: 1,
+        wonBalls: 1000,
+        postWinHeldBalls: 800
+      }
+    ]
+
+    const result = calcRecordAggregates(periods)
+
+    expect(result.finalHeldBalls).toBe(800)
+  })
+
+  it('calcRecordAggregates: 最後の区間実績の当選後持玉が未入力なら終了持玉を最終持玉とする', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const periods = [
+      {
+        investment: 1000,
+        startHeldBalls: 0,
+        endHeldBalls: 100,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0,
+        postWinHeldBalls: null
+      }
+    ]
+
+    const result = calcRecordAggregates(periods)
+
+    expect(result.finalHeldBalls).toBe(100)
+  })
+
   it('calcRecordAggregates: 区間実績が無ければ全て0を返す', () => {
     const { calcRecordAggregates } = useMetrics()
     const result = calcRecordAggregates([])

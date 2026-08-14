@@ -38,7 +38,7 @@ export function useMetrics() {
       totals.totalInvestment += period.investment
       totals.totalInvestedBalls += (period.startHeldBalls - period.endHeldBalls) + (period.startRentalBalls - period.endRentalBalls)
       totals.totalRotations += period.endRotations - period.startRotations
-      totals.finalHeldBalls = period.endHeldBalls
+      totals.finalHeldBalls = period.postWinHeldBalls != null ? period.postWinHeldBalls : period.endHeldBalls
       totals.totalContinueCount += period.continueCount
       totals.totalWonBalls += period.wonBalls
       if (period.winType === 'rush') totals.rushWinCount += 1
