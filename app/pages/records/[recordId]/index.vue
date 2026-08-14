@@ -118,7 +118,6 @@ const { formatNumber } = useFormat()
 
 const record = ref(null)
 const periods = ref([])
-const hallName = ref('')
 const machineName = ref('')
 const now = ref(new Date())
 const updating = ref(false)
@@ -130,16 +129,14 @@ async function loadRecord() {
   const db = useDb()
   const fetchedRecord = await db.records.get(recordId)
   if (!fetchedRecord) return
-  const [hall, machine, periodList] = await Promise.all([
-    fetchedRecord.hallId ? db.halls.get(fetchedRecord.hallId) : null,
+  const [machine, periodList] = await Promise.all([
     fetchedRecord.machineId ? db.machines.get(fetchedRecord.machineId) : null,
     db.periods.where('recordId').equals(recordId).sortBy('startTime')
   ])
-  // hallName/machineName は record より先にセットする。RecordBasicInfoForm は
+  // machineName は record より先にセットする。RecordBasicInfoForm は
   // v-if="record" でマウントされ、その時点の props.initial を元に一度だけ
-  // 内部状態を初期化するため、record を先に立てると空の店舗名・機種名で
+  // 内部状態を初期化するため、record を先に立てると空の機種名で
   // マウントされてしまう。
-  hallName.value = hall?.name ?? ''
   machineName.value = machine?.name ?? ''
   periods.value = periodList
   record.value = fetchedRecord
@@ -166,10 +163,10 @@ onUnmounted(() => {
 const basicInfoInitial = computed(() => (record.value ? {
   date: record.value.date,
   hallId: record.value.hallId,
-  hallName: hallName.value,
   machineId: record.value.machineId,
   machineName: machineName.value,
   machineNumber: record.value.machineNumber,
+  exchangeRate: record.value.exchangeRate,
   startTime: record.value.startTime,
   endTime: record.value.endTime
 } : null))

@@ -45,6 +45,7 @@ const tabs = [
   { to: '/', label: 'TOP' },
   { to: '/records/', label: '履歴' },
   { to: '/analysis/', label: '分析' },
-  { to: '/settings/', label: '設定' }
+  { to: '/settings/', label: '設定' },
+  { to: '/halls/', label: '店舗一覧' }
 ]
 </script>

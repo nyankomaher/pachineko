@@ -1,44 +1,62 @@
 <template>
   <div class="flex flex-col gap-4">
-    <div class="grid grid-cols-2 gap-4">
-      <div class="flex flex-col gap-1">
-        <label for="record-date">日付</label>
-        <DatePicker id="record-date" v-model="date" date-format="yy-mm-dd" show-icon fluid />
-      </div>
+    <div class="flex flex-col gap-1">
+      <label for="record-date">日付</label>
+      <DatePicker id="record-date" v-model="date" date-format="yy-mm-dd" show-icon fluid />
+    </div>
 
-      <div class="flex flex-col gap-1">
-        <label for="record-hall">店舗</label>
-        <AutoComplete
-          id="record-hall"
-          v-model="hallInput"
-          :suggestions="hallSuggestions"
-          option-label="name"
-          dropdown
-          fluid
-          placeholder="店舗名を入力"
-          @complete="searchHalls"
-        />
+    <div class="flex flex-col gap-1">
+      <label for="record-hall">店舗</label>
+      <div class="flex items-center gap-2">
+        <div class="flex-1">
+          <Select
+            id="record-hall"
+            v-model="hallId"
+            :options="halls"
+            option-label="name"
+            option-value="id"
+            placeholder="店舗を選択"
+            fluid
+          />
+        </div>
+        <Button rounded aria-label="店舗を追加" @click="addHallDialogVisible = true">
+          <template #icon>
+            <PlusIcon />
+          </template>
+        </Button>
       </div>
     </div>
 
-    <div class="grid grid-cols-[3fr_1fr] gap-4">
-      <div class="flex flex-col gap-1">
-        <label for="record-machine">機種</label>
-        <AutoComplete
-          id="record-machine"
-          v-model="machineInput"
-          :suggestions="machineSuggestions"
-          option-label="name"
-          dropdown
-          fluid
-          placeholder="機種名を入力"
-          @complete="searchMachines"
-        />
-      </div>
+    <div class="flex flex-col gap-1">
+      <label for="record-machine">機種</label>
+      <AutoComplete
+        id="record-machine"
+        v-model="machineInput"
+        :suggestions="machineSuggestions"
+        option-label="name"
+        dropdown
+        fluid
+        placeholder="機種名を入力"
+        @complete="searchMachines"
+      />
+    </div>
 
+    <div class="grid grid-cols-2 gap-4">
       <div class="flex flex-col gap-1">
         <label for="record-machine-number">台番号</label>
         <InputText id="record-machine-number" v-model="machineNumber" placeholder="台番号" fluid />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label for="record-exchange-rate">交換レート</label>
+        <InputNumber
+          id="record-exchange-rate"
+          v-model="exchangeRate"
+          :use-grouping="false"
+          :min-fraction-digits="0"
+          :max-fraction-digits="2"
+          fluid
+        />
       </div>
     </div>
 
@@ -61,10 +79,16 @@
       :disabled="!isValid || loading || submitting"
       @click="handleSubmit"
     />
+
+    <Dialog v-model:visible="addHallDialogVisible" modal header="店舗を登録" :style="{ width: '20rem' }">
+      <HallForm submit-label="登録" :loading="creatingHall" @submit="handleCreateHall" />
+    </Dialog>
   </div>
 </template>
 
 <script setup>
+import PlusIcon from '@primevue/icons/plus'
+
 const props = defineProps({
   initial: { type: Object, default: null },
   submitLabel: { type: String, required: true },
@@ -95,20 +119,38 @@ function toIsoString(value) {
 }
 
 const date = ref(props.initial ? parseDateOnly(props.initial.date) : new Date())
-const hallInput = ref(props.initial ? { id: props.initial.hallId, name: props.initial.hallName } : '')
+const hallId = ref(props.initial?.hallId ?? null)
 const machineInput = ref(props.initial ? { id: props.initial.machineId, name: props.initial.machineName } : '')
 const machineNumber = ref(props.initial?.machineNumber ?? '')
+const exchangeRate = ref(props.initial?.exchangeRate ?? 4)
 const startTime = ref(props.initial ? parseDateTime(props.initial.startTime) : new Date())
 const endTime = ref(props.initial ? parseDateTime(props.initial.endTime) : null)
 const submitting = ref(false)
-const hallSuggestions = ref([])
 const machineSuggestions = ref([])
+const halls = ref([])
+const addHallDialogVisible = ref(false)
+const creatingHall = ref(false)
 
-async function searchHalls(event) {
+async function loadHalls() {
   const db = useDb()
-  const query = event.query.trim()
-  const all = await db.halls.toArray()
-  hallSuggestions.value = query ? all.filter((h) => h.name.includes(query)) : all
+  halls.value = await db.halls.orderBy('order').toArray()
+}
+
+onMounted(loadHalls)
+
+async function handleCreateHall(hallData) {
+  creatingHall.value = true
+  try {
+    const db = useDb()
+    const existing = await db.halls.toArray()
+    const maxOrder = existing.reduce((max, hall) => Math.max(max, hall.order ?? -1), -1)
+    const newHallId = await db.halls.add({ ...hallData, order: maxOrder + 1 })
+    await loadHalls()
+    hallId.value = newHallId
+    addHallDialogVisible.value = false
+  } finally {
+    creatingHall.value = false
+  }
 }
 
 async function searchMachines(event) {
@@ -118,14 +160,14 @@ async function searchMachines(event) {
   machineSuggestions.value = query ? all.filter((m) => m.name.includes(query)) : all
 }
 
-const hallNameValue = computed(() => (typeof hallInput.value === 'object' ? hallInput.value?.name : hallInput.value))
 const machineNameValue = computed(() => (typeof machineInput.value === 'object' ? machineInput.value?.name : machineInput.value))
 
 const isValid = computed(() => {
   const baseOk = !!date.value
-    && !!hallNameValue.value?.trim()
+    && hallId.value != null
     && !!machineNameValue.value?.trim()
     && !!machineNumber.value?.trim()
+    && exchangeRate.value != null
     && !!startTime.value
   if (!baseOk) return false
   if (!props.recording && !endTime.value) return false
@@ -145,13 +187,13 @@ async function handleSubmit() {
   submitting.value = true
   try {
     const db = useDb()
-    const hallId = await resolveId(db.halls, hallInput.value)
     const machineId = await resolveId(db.machines, machineInput.value)
     emit('submit', {
       date: toDateOnlyString(date.value),
-      hallId,
+      hallId: hallId.value,
       machineId,
       machineNumber: machineNumber.value.trim(),
+      exchangeRate: exchangeRate.value,
       startTime: toIsoString(startTime.value),
       endTime: toIsoString(endTime.value)
     })
