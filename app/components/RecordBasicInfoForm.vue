@@ -49,12 +49,10 @@
 
       <div class="flex flex-col gap-1">
         <label for="record-exchange-rate">交換レート</label>
-        <InputNumber
+        <Select
           id="record-exchange-rate"
           v-model="exchangeRate"
-          :use-grouping="false"
-          :min-fraction-digits="0"
-          :max-fraction-digits="2"
+          :options="exchangeRateOptions"
           fluid
         />
       </div>
@@ -122,7 +120,15 @@ const date = ref(props.initial ? parseDateOnly(props.initial.date) : new Date())
 const hallId = ref(props.initial?.hallId ?? null)
 const machineInput = ref(props.initial ? { id: props.initial.machineId, name: props.initial.machineName } : '')
 const machineNumber = ref(props.initial?.machineNumber ?? '')
-const exchangeRate = ref(props.initial?.exchangeRate ?? 4)
+const exchangeRateOptionsStore = useExchangeRateOptionsStore()
+const exchangeRateOptions = computed(() => {
+  const options = [...exchangeRateOptionsStore.options]
+  if (props.initial?.exchangeRate != null && !options.includes(props.initial.exchangeRate)) {
+    options.push(props.initial.exchangeRate)
+  }
+  return options.sort((a, b) => a - b)
+})
+const exchangeRate = ref(props.initial?.exchangeRate ?? exchangeRateOptions.value[0] ?? null)
 const startTime = ref(props.initial ? parseDateTime(props.initial.startTime) : new Date())
 const endTime = ref(props.initial ? parseDateTime(props.initial.endTime) : null)
 const submitting = ref(false)
