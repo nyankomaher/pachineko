@@ -10,7 +10,7 @@
 
 ### 一覧表示
 
-表形式（PrimeVueの `DataTable`）で以下を表示する。
+表形式で以下を表示する。並び替え（後述）を `vuedraggable`（SortableJSベース）で実装する都合上、PrimeVueの `DataTable` コンポーネント自体は使用せず、`DataTable` と同等の見た目になるようPrimeVueのCSSクラスを付与した独自の `<table>` 実装とする（`vuedraggable` の `<draggable>` を `<tbody>` として組み込む）。`specs/records-list.md` の実績一覧では実際に `DataTable` コンポーネントを使用しており、本画面とは実装方式が異なる。
 
 | 列 | 内容 |
 |---|---|
@@ -24,7 +24,7 @@
 ### 並び替え（ドラッグ&ドロップ）
 
 - 各行の末尾にドラッグ&ドロップ用のハンドルアイコンを配置する。
-- スマートフォンでのタッチ操作でも並び替えできるようにする。PrimeVue DataTableの `reorderableRows` はHTML5 Drag and Drop APIベースでタッチ操作に対応していないため採用せず、タッチ操作に対応したドラッグ&ドロップ手段（例: ポインターイベントベースのライブラリ、あるいは同等の実装）を用いる。具体的な実装方式は実装フェーズで確定する。
+- スマートフォンでのタッチ操作でも並び替えできるようにする。PrimeVue DataTableの `reorderableRows` はHTML5 Drag and Drop APIベースでタッチ操作に対応していないため採用せず、`vuedraggable`（SortableJSのVueラッパー、ポインター/タッチイベントベース）を用いる。
 - 並び替えが確定した時点で、その並び順をもとに各店舗の `order` を振り直し、即座にDBへ保存する（明示的な保存ボタンは設けない）。
 
 ### レイアウト方針
