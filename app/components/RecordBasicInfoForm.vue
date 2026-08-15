@@ -70,6 +70,19 @@
       </div>
     </div>
 
+    <div class="flex flex-col gap-1">
+      <label for="record-balance">収支</label>
+      <InputNumber
+        id="record-balance"
+        v-model="balance"
+        :use-grouping="false"
+        :min-fraction-digits="0"
+        :max-fraction-digits="2"
+        fluid
+        :disabled="recording"
+      />
+    </div>
+
     <Button
       class="mt-2"
       :label="submitLabel"
@@ -131,6 +144,7 @@ const exchangeRateOptions = computed(() => {
 const exchangeRate = ref(props.initial?.exchangeRate ?? exchangeRateOptions.value[0] ?? null)
 const startTime = ref(props.initial ? parseDateTime(props.initial.startTime) : new Date())
 const endTime = ref(props.initial ? parseDateTime(props.initial.endTime) : null)
+const balance = ref(props.initial?.balance ?? 0)
 const submitting = ref(false)
 const machineSuggestions = ref([])
 const halls = ref([])
@@ -201,7 +215,8 @@ async function handleSubmit() {
       machineNumber: machineNumber.value.trim(),
       exchangeRate: exchangeRate.value,
       startTime: toIsoString(startTime.value),
-      endTime: toIsoString(endTime.value)
+      endTime: toIsoString(endTime.value),
+      balance: balance.value ?? 0
     })
   } finally {
     submitting.value = false

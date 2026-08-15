@@ -22,6 +22,8 @@
           <dd>{{ formatNumber(record.totalInvestment) }}円</dd>
           <dt class="text-zinc-500">投資持玉</dt>
           <dd>{{ formatNumber(record.totalInvestedBalls) }}玉</dd>
+          <dt class="text-zinc-500">獲得玉数</dt>
+          <dd>{{ formatNumber(record.totalWonBalls) }}玉</dd>
           <dt class="text-zinc-500">最終持玉</dt>
           <dd>{{ formatNumber(record.finalHeldBalls) }}玉</dd>
           <dt class="text-zinc-500">回転数</dt>
@@ -34,8 +36,6 @@
           <dd>{{ formatNumber(record.chargeWinCount) }}</dd>
           <dt class="text-zinc-500">連荘数</dt>
           <dd>{{ formatNumber(record.totalContinueCount) }}</dd>
-          <dt class="text-zinc-500">獲得玉数</dt>
-          <dd>{{ formatNumber(record.totalWonBalls) }}玉</dd>
         </dl>
       </section>
 
@@ -168,7 +168,8 @@ const basicInfoInitial = computed(() => (record.value ? {
   machineNumber: record.value.machineNumber,
   exchangeRate: record.value.exchangeRate,
   startTime: record.value.startTime,
-  endTime: record.value.endTime
+  endTime: record.value.endTime,
+  balance: record.value.balance
 } : null))
 
 const isOwnSession = computed(() => recordingSession.isRecording && recordingSession.recordId === recordId)
