@@ -52,6 +52,12 @@ describe('useMetrics', () => {
     expect(result).toBe(1500)
   })
 
+  it('calcActualInvestment: 小数点以下は四捨五入する', () => {
+    const { calcActualInvestment } = useMetrics()
+    expect(calcActualInvestment({ investment: 100, investedBalls: 1, exchangeRate: 3.55 })).toBe(104)
+    expect(calcActualInvestment({ investment: 100, investedBalls: 1, exchangeRate: 3.44 })).toBe(103)
+  })
+
   it('calcRotationsPer1000Yen: みなし投資金額が0以下なら0を返す', () => {
     const { calcRotationsPer1000Yen } = useMetrics()
     expect(calcRotationsPer1000Yen(300, 0)).toBe(0)

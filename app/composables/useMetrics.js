@@ -8,7 +8,7 @@ export function useMetrics() {
   }
 
   function calcActualInvestment({ investment, investedBalls, exchangeRate }) {
-    return investment + investedBalls * exchangeRate
+    return Math.round(investment + investedBalls * exchangeRate)
   }
 
   function calcRotationsPer1000Yen(rotations, deemedInvestment) {
