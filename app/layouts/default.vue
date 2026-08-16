@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-screen flex-col overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+  <div class="flex min-h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
     <Button
       class="fixed right-4 top-4 z-[2000]"
       rounded

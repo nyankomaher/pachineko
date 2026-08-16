@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-full flex-col gap-4 p-4">
+  <div class="flex h-screen flex-col gap-4 p-4">
     <h1 class="text-xl font-bold">実績一覧</h1>
 
     <Accordion>
