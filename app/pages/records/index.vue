@@ -21,11 +21,27 @@
             </div>
             <div class="flex flex-col gap-1">
               <label for="filter-hall">店舗</label>
-              <Select id="filter-hall" v-model="hallFilter" :options="hallOptions" placeholder="すべて" show-clear fluid />
+              <AutoComplete
+                id="filter-hall"
+                v-model="hallFilter"
+                :suggestions="hallSuggestions"
+                dropdown
+                fluid
+                placeholder="すべて"
+                @complete="searchHalls"
+              />
             </div>
             <div class="flex flex-col gap-1">
               <label for="filter-machine">機種</label>
-              <Select id="filter-machine" v-model="machineFilter" :options="machineOptions" placeholder="すべて" show-clear fluid />
+              <AutoComplete
+                id="filter-machine"
+                v-model="machineFilter"
+                :suggestions="machineSuggestions"
+                dropdown
+                fluid
+                placeholder="すべて"
+                @complete="searchMachines"
+              />
             </div>
           </div>
         </AccordionContent>
@@ -49,11 +65,11 @@
           </div>
         </template>
       </Column>
-      <Column header="投資">
+      <Column header="投資/収支">
         <template #body="{ data }">
           <div class="flex flex-col text-right">
-            <span>{{ formatNumber(data.totalInvestment) }}円</span>
-            <span>{{ formatNumber(data.totalInvestedBalls) }}玉</span>
+            <span>{{ formatNumber(actualInvestment(data)) }}</span>
+            <span :class="balanceClass(data.balance)">{{ formatBalance(data.balance) }}</span>
           </div>
         </template>
       </Column>
@@ -65,14 +81,7 @@
           </div>
         </template>
       </Column>
-      <Column header="収支">
-        <template #body="{ data }">
-          <div class="text-right">
-            <span :class="balanceClass(data.balance)">{{ formatBalance(data.balance) }}</span>
-          </div>
-        </template>
-      </Column>
-      <Column header="店舗・機種">
+      <Column header="店舗/機種">
         <template #body="{ data }">
           <div class="flex flex-col">
             <span>{{ data.hallName }}</span>
@@ -88,7 +97,7 @@
 
 <script setup>
 const recordingSession = useRecordingSessionStore()
-const { formatRotationsPer1000Yen } = useMetrics()
+const { formatRotationsPer1000Yen, calcActualInvestment } = useMetrics()
 const { formatNumber } = useFormat()
 
 const records = ref([])
@@ -97,8 +106,10 @@ const machines = ref([])
 
 const dateFromFilter = ref(null)
 const dateToFilter = ref(null)
-const hallFilter = ref(null)
-const machineFilter = ref(null)
+const hallFilter = ref('')
+const machineFilter = ref('')
+const hallSuggestions = ref([])
+const machineSuggestions = ref([])
 
 function toDateOnlyString(value) {
   if (!value) return null
@@ -131,8 +142,17 @@ async function load() {
 
 onMounted(load)
 
-const hallOptions = computed(() => halls.value.map((h) => h.name))
-const machineOptions = computed(() => machines.value.map((m) => m.name))
+function searchHalls(event) {
+  const query = event.query.trim()
+  const names = halls.value.map((h) => h.name)
+  hallSuggestions.value = query ? names.filter((name) => name.includes(query)) : names
+}
+
+function searchMachines(event) {
+  const query = event.query.trim()
+  const names = machines.value.map((m) => m.name)
+  machineSuggestions.value = query ? names.filter((name) => name.includes(query)) : names
+}
 
 const rows = computed(() => {
   const hallMap = new Map(halls.value.map((h) => [h.id, h.name]))
@@ -143,7 +163,7 @@ const rows = computed(() => {
       hallName: hallMap.get(record.hallId) ?? '',
       machineName: machineMap.get(record.machineId) ?? ''
     }))
-    .sort((a, b) => b.date.localeCompare(a.date))
+    .sort((a, b) => b.startTime.localeCompare(a.startTime))
 })
 
 const filteredRows = computed(() => {
@@ -152,16 +172,24 @@ const filteredRows = computed(() => {
   return rows.value.filter((r) => {
     if (fromValue && r.date < fromValue) return false
     if (toValue && r.date > toValue) return false
-    if (hallFilter.value && r.hallName !== hallFilter.value) return false
-    if (machineFilter.value && r.machineName !== machineFilter.value) return false
+    if (hallFilter.value && !r.hallName.includes(hallFilter.value)) return false
+    if (machineFilter.value && !r.machineName.includes(machineFilter.value)) return false
     return true
   })
 })
 
+function actualInvestment(row) {
+  return calcActualInvestment({
+    investment: row.totalInvestment,
+    investedBalls: row.totalInvestedBalls,
+    exchangeRate: row.exchangeRate
+  })
+}
+
 function formatBalance(value) {
   const num = value ?? 0
   const sign = num > 0 ? '+' : ''
-  return `${sign}${formatNumber(num)}円`
+  return `${sign}${formatNumber(num)}`
 }
 
 function balanceClass(value) {
