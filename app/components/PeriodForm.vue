@@ -57,16 +57,16 @@
 
     <section class="flex flex-col gap-2 rounded border border-zinc-200 p-3 text-sm dark:border-zinc-800">
       <div class="flex justify-between">
-        <span class="text-zinc-500">みなし投資金額</span>
-        <span>{{ formatNumber(periodDeemedInvestment) }}円</span>
+        <span class="text-zinc-500">区間投資</span>
+        <span>{{ formatInvestmentBreakdown(investment ?? 0, periodInvestedBalls, periodActualInvestment) }}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-zinc-500">回転数</span>
         <span>{{ formatNumber(periodRotations) }}回転 ({{ formatRotationsPer1000Yen(periodRotationsPer1000Yen) }}回転)</span>
       </div>
       <div class="flex justify-between">
-        <span class="text-zinc-500">総投資金額</span>
-        <span>{{ formatNumber(cumulativeInvestment) }}円</span>
+        <span class="text-zinc-500">総投資</span>
+        <span>{{ formatInvestmentBreakdown(cumulativeInvestment, cumulativeInvestedBalls, cumulativeActualInvestment) }}</span>
       </div>
       <div class="flex justify-between">
         <span class="text-zinc-500">総回転数</span>
@@ -122,13 +122,14 @@
 const props = defineProps({
   initial: { type: Object, default: null },
   baselineTotals: { type: Object, default: null },
+  exchangeRate: { type: Number, required: true },
   submitLabel: { type: String, required: true },
   loading: { type: Boolean, default: false }
 })
 
 const emit = defineEmits(['submit'])
 
-const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen } = useMetrics()
+const { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen } = useMetrics()
 const { winTypes } = useWinTypes()
 const { formatNumber } = useFormat()
 
@@ -179,17 +180,42 @@ const periodRotationsPer1000Yen = computed(() => {
   return calcRotationsPer1000Yen(periodRotations.value, periodDeemedInvestment.value)
 });
 
+const periodInvestedBalls = computed(() => calcInvestedBalls({
+  startHeldBalls: startHeldBalls.value ?? 0,
+  endHeldBalls: endHeldBalls.value ?? 0,
+  startRentalBalls: startRentalBalls.value ?? 0,
+  endRentalBalls: endRentalBalls.value ?? 0
+}))
+
+const periodActualInvestment = computed(() => calcActualInvestment({
+  investment: investment.value ?? 0,
+  investedBalls: periodInvestedBalls.value,
+  exchangeRate: props.exchangeRate
+}))
+
 const cumulativeRotations = computed(() => (props.baselineTotals?.totalRotations ?? 0) + periodRotations.value)
 
 const cumulativeInvestment = computed(() => (props.baselineTotals?.totalInvestment ?? 0) + (investment.value ?? 0))
 
 const cumulativeDeemedInvestment = computed(() => {
   const baseInvestedBalls = props.baselineTotals?.totalInvestedBalls ?? 0
-  const periodInvestedBalls = ((startHeldBalls.value ?? 0) - (endHeldBalls.value ?? 0)) + ((startRentalBalls.value ?? 0) - (endRentalBalls.value ?? 0))
-  return cumulativeInvestment.value + (baseInvestedBalls + periodInvestedBalls) * 4
+  return cumulativeInvestment.value + (baseInvestedBalls + periodInvestedBalls.value) * 4
 })
 
 const cumulativeRotationsPer1000Yen = computed(() => calcRotationsPer1000Yen(cumulativeRotations.value, cumulativeDeemedInvestment.value))
+
+const cumulativeInvestedBalls = computed(() => (props.baselineTotals?.totalInvestedBalls ?? 0) + periodInvestedBalls.value)
+
+const cumulativeActualInvestment = computed(() => calcActualInvestment({
+  investment: cumulativeInvestment.value,
+  investedBalls: cumulativeInvestedBalls.value,
+  exchangeRate: props.exchangeRate
+}))
+
+function formatInvestmentBreakdown(investmentAmount, investedBalls, actualInvestment) {
+  const sign = investedBalls < 0 ? '-' : '+'
+  return `${formatNumber(investmentAmount)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉 (${formatNumber(actualInvestment)}円)`
+}
 
 const isValid = computed(() => (
   startTime.value != null

@@ -7,6 +7,7 @@
       :key="formKey"
       :initial="periodDefaults"
       :baseline-totals="baselineTotals"
+      :exchange-rate="record.exchangeRate"
       submit-label="記録"
       :loading="saving"
       @submit="handleSave"

@@ -3,6 +3,14 @@ export function useMetrics() {
     return investment + ((startHeldBalls - endHeldBalls) + (startRentalBalls - endRentalBalls)) * 4
   }
 
+  function calcInvestedBalls({ startHeldBalls, endHeldBalls, startRentalBalls, endRentalBalls }) {
+    return (startHeldBalls - endHeldBalls) + (startRentalBalls - endRentalBalls)
+  }
+
+  function calcActualInvestment({ investment, investedBalls, exchangeRate }) {
+    return investment + investedBalls * exchangeRate
+  }
+
   function calcRotationsPer1000Yen(rotations, deemedInvestment) {
     if (deemedInvestment <= 0 || rotations <= 0) return 0
     return rotations / (deemedInvestment / 1000)
@@ -62,5 +70,5 @@ export function useMetrics() {
       : '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
   }
 
-  return { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, validateRentalBallsForEnd }
+  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, validateRentalBallsForEnd }
 }

@@ -18,6 +18,40 @@ describe('useMetrics', () => {
     expect(calcRotationsPer1000Yen(300, 15000)).toBeCloseTo(20)
   })
 
+  it('calcInvestedBalls: 持玉・貸玉の増減から投資玉数を算出する', () => {
+    const { calcInvestedBalls } = useMetrics()
+    const result = calcInvestedBalls({
+      startHeldBalls: 500,
+      endHeldBalls: 200,
+      startRentalBalls: 100,
+      endRentalBalls: 50
+    })
+    expect(result).toBe((500 - 200) + (100 - 50))
+  })
+
+  it('calcInvestedBalls: 持玉・貸玉が増加した場合は負の値になる', () => {
+    const { calcInvestedBalls } = useMetrics()
+    const result = calcInvestedBalls({
+      startHeldBalls: 0,
+      endHeldBalls: 500,
+      startRentalBalls: 0,
+      endRentalBalls: 0
+    })
+    expect(result).toBe(-500)
+  })
+
+  it('calcActualInvestment: 投資金額に投資玉数×交換レートを加算する（区間投資の実質投資額）', () => {
+    const { calcActualInvestment } = useMetrics()
+    const result = calcActualInvestment({ investment: 3000, investedBalls: 1000, exchangeRate: 3.5 })
+    expect(result).toBe(6500)
+  })
+
+  it('calcActualInvestment: 投資玉数が負の場合は投資金額から差し引かれる', () => {
+    const { calcActualInvestment } = useMetrics()
+    const result = calcActualInvestment({ investment: 3000, investedBalls: -500, exchangeRate: 3 })
+    expect(result).toBe(1500)
+  })
+
   it('calcRotationsPer1000Yen: みなし投資金額が0以下なら0を返す', () => {
     const { calcRotationsPer1000Yen } = useMetrics()
     expect(calcRotationsPer1000Yen(300, 0)).toBe(0)

@@ -6,6 +6,7 @@
       v-if="record && period"
       :initial="period"
       :baseline-totals="baselineTotals"
+      :exchange-rate="record.exchangeRate"
       submit-label="修正"
       :loading="saving"
       @submit="handleUpdate"
