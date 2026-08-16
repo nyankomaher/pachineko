@@ -65,6 +65,13 @@
           </div>
         </template>
       </Column>
+      <Column header="収支">
+        <template #body="{ data }">
+          <div class="text-right">
+            <span :class="balanceClass(data.balance)">{{ formatBalance(data.balance) }}</span>
+          </div>
+        </template>
+      </Column>
       <Column header="店舗・機種">
         <template #body="{ data }">
           <div class="flex flex-col">
@@ -150,6 +157,19 @@ const filteredRows = computed(() => {
     return true
   })
 })
+
+function formatBalance(value) {
+  const num = value ?? 0
+  const sign = num > 0 ? '+' : ''
+  return `${sign}${formatNumber(num)}円`
+}
+
+function balanceClass(value) {
+  const num = value ?? 0
+  if (num > 0) return 'text-red-600 dark:text-red-400'
+  if (num < 0) return 'text-blue-600 dark:text-blue-400'
+  return ''
+}
 
 function isRecordingRow(record) {
   return recordingSession.isRecording && recordingSession.recordId === record.id
