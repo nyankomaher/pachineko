@@ -61,7 +61,7 @@
         <span>{{ formatInvestmentBreakdown(investment ?? 0, periodInvestedBalls, periodActualInvestment) }}</span>
       </div>
       <div class="flex justify-between">
-        <span class="text-zinc-500">回転数</span>
+        <span class="text-zinc-500">区間回転数</span>
         <span>{{ formatNumber(periodRotations) }}回転 ({{ formatRotationsPer1000Yen(periodRotationsPer1000Yen) }}回転)</span>
       </div>
       <div class="flex justify-between">
@@ -214,7 +214,7 @@ const cumulativeActualInvestment = computed(() => calcActualInvestment({
 
 function formatInvestmentBreakdown(investmentAmount, investedBalls, actualInvestment) {
   const sign = investedBalls < 0 ? '-' : '+'
-  return `${formatNumber(investmentAmount)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉 (${formatNumber(actualInvestment)}円)`
+  return `${formatNumber(actualInvestment)}円 (${formatNumber(investmentAmount)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉)`
 }
 
 const isValid = computed(() => (
