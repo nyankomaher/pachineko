@@ -29,16 +29,24 @@
 
     <div class="flex flex-col gap-1">
       <label for="record-machine">機種</label>
-      <AutoComplete
-        id="record-machine"
-        v-model="machineInput"
-        :suggestions="machineSuggestions"
-        option-label="name"
-        dropdown
-        fluid
-        placeholder="機種名を入力"
-        @complete="searchMachines"
-      />
+      <div class="flex items-center gap-2">
+        <div class="flex-1">
+          <Select
+            id="record-machine"
+            v-model="machineId"
+            :options="machines"
+            option-label="name"
+            option-value="id"
+            placeholder="機種を選択"
+            fluid
+          />
+        </div>
+        <Button rounded aria-label="機種を追加" @click="addMachineDialogVisible = true">
+          <template #icon>
+            <PlusIcon />
+          </template>
+        </Button>
+      </div>
     </div>
 
     <div class="grid grid-cols-2 gap-4">
@@ -94,6 +102,10 @@
     <Dialog v-model:visible="addHallDialogVisible" modal header="店舗を登録" :style="{ width: '20rem' }">
       <HallForm submit-label="登録" :loading="creatingHall" @submit="handleCreateHall" />
     </Dialog>
+
+    <Dialog v-model:visible="addMachineDialogVisible" modal header="機種を登録" :style="{ width: '20rem' }">
+      <MachineForm submit-label="登録" :loading="creatingMachine" @submit="handleCreateMachine" />
+    </Dialog>
   </div>
 </template>
 
@@ -131,7 +143,7 @@ function toIsoString(value) {
 
 const date = ref(props.initial ? parseDateOnly(props.initial.date) : new Date())
 const hallId = ref(props.initial?.hallId ?? null)
-const machineInput = ref(props.initial ? { id: props.initial.machineId, name: props.initial.machineName } : '')
+const machineId = ref(props.initial?.machineId ?? null)
 const machineNumber = ref(props.initial?.machineNumber ?? '')
 const exchangeRateOptionsStore = useExchangeRateOptionsStore()
 const exchangeRateOptions = computed(() => {
@@ -146,17 +158,27 @@ const startTime = ref(props.initial ? parseDateTime(props.initial.startTime) : n
 const endTime = ref(props.initial ? parseDateTime(props.initial.endTime) : null)
 const balance = ref(props.initial?.balance ?? 0)
 const submitting = ref(false)
-const machineSuggestions = ref([])
 const halls = ref([])
+const machines = ref([])
 const addHallDialogVisible = ref(false)
+const addMachineDialogVisible = ref(false)
 const creatingHall = ref(false)
+const creatingMachine = ref(false)
 
 async function loadHalls() {
   const db = useDb()
   halls.value = await db.halls.orderBy('order').toArray()
 }
 
-onMounted(loadHalls)
+async function loadMachines() {
+  const db = useDb()
+  machines.value = await db.machines.orderBy('order').toArray()
+}
+
+onMounted(() => {
+  loadHalls()
+  loadMachines()
+})
 
 async function handleCreateHall(hallData) {
   creatingHall.value = true
@@ -173,19 +195,25 @@ async function handleCreateHall(hallData) {
   }
 }
 
-async function searchMachines(event) {
-  const db = useDb()
-  const query = event.query.trim()
-  const all = await db.machines.toArray()
-  machineSuggestions.value = query ? all.filter((m) => m.name.includes(query)) : all
+async function handleCreateMachine(machineData) {
+  creatingMachine.value = true
+  try {
+    const db = useDb()
+    const existing = await db.machines.toArray()
+    const maxOrder = existing.reduce((max, machine) => Math.max(max, machine.order ?? -1), -1)
+    const newMachineId = await db.machines.add({ ...machineData, order: maxOrder + 1 })
+    await loadMachines()
+    machineId.value = newMachineId
+    addMachineDialogVisible.value = false
+  } finally {
+    creatingMachine.value = false
+  }
 }
-
-const machineNameValue = computed(() => (typeof machineInput.value === 'object' ? machineInput.value?.name : machineInput.value))
 
 const isValid = computed(() => {
   const baseOk = !!date.value
     && hallId.value != null
-    && !!machineNameValue.value?.trim()
+    && machineId.value != null
     && !!machineNumber.value?.trim()
     && exchangeRate.value != null
     && !!startTime.value
@@ -194,24 +222,13 @@ const isValid = computed(() => {
   return true
 })
 
-async function resolveId(table, input) {
-  if (input && typeof input === 'object') return input.id
-  const name = (input ?? '').trim()
-  if (!name) return null
-  const existing = await table.where('name').equals(name).first()
-  if (existing) return existing.id
-  return table.add({ name })
-}
-
 async function handleSubmit() {
   submitting.value = true
   try {
-    const db = useDb()
-    const machineId = await resolveId(db.machines, machineInput.value)
     emit('submit', {
       date: toDateOnlyString(date.value),
       hallId: hallId.value,
-      machineId,
+      machineId: machineId.value,
       machineNumber: machineNumber.value.trim(),
       exchangeRate: exchangeRate.value,
       startTime: toIsoString(startTime.value),

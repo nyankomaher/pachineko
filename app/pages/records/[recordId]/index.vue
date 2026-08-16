@@ -118,7 +118,6 @@ const { formatNumber } = useFormat()
 
 const record = ref(null)
 const periods = ref([])
-const machineName = ref('')
 const now = ref(new Date())
 const updating = ref(false)
 const deleteDialogVisible = ref(false)
@@ -129,16 +128,7 @@ async function loadRecord() {
   const db = useDb()
   const fetchedRecord = await db.records.get(recordId)
   if (!fetchedRecord) return
-  const [machine, periodList] = await Promise.all([
-    fetchedRecord.machineId ? db.machines.get(fetchedRecord.machineId) : null,
-    db.periods.where('recordId').equals(recordId).sortBy('startTime')
-  ])
-  // machineName は record より先にセットする。RecordBasicInfoForm は
-  // v-if="record" でマウントされ、その時点の props.initial を元に一度だけ
-  // 内部状態を初期化するため、record を先に立てると空の機種名で
-  // マウントされてしまう。
-  machineName.value = machine?.name ?? ''
-  periods.value = periodList
+  periods.value = await db.periods.where('recordId').equals(recordId).sortBy('startTime')
   record.value = fetchedRecord
   setupTimer()
 }
@@ -164,7 +154,6 @@ const basicInfoInitial = computed(() => (record.value ? {
   date: record.value.date,
   hallId: record.value.hallId,
   machineId: record.value.machineId,
-  machineName: machineName.value,
   machineNumber: record.value.machineNumber,
   exchangeRate: record.value.exchangeRate,
   startTime: record.value.startTime,
