@@ -15,27 +15,27 @@
 
       <section class="flex flex-col gap-2">
         <h2 class="font-semibold">集計</h2>
-        <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
           <dt class="text-zinc-500">経過時間</dt>
-          <dd>{{ elapsedTimeLabel }}</dd>
-          <dt class="text-zinc-500">投資金額</dt>
-          <dd>{{ formatNumber(record.totalInvestment) }}円</dd>
-          <dt class="text-zinc-500">投資持玉</dt>
-          <dd>{{ formatNumber(record.totalInvestedBalls) }}玉</dd>
+          <dd class="text-right">{{ elapsedTimeLabel }}</dd>
+          <dt class="text-zinc-500">純投資</dt>
+          <dd class="text-right">{{ formatInvestmentEquation(record.totalInvestment ?? 0, record.totalInvestedSavedBalls ?? 0, netInvestment) }}</dd>
+          <dt class="text-zinc-500">総投資</dt>
+          <dd class="text-right">{{ formatInvestmentEquation(record.totalInvestment ?? 0, record.totalInvestedBalls ?? 0, totalActualInvestment) }}</dd>
           <dt class="text-zinc-500">出玉</dt>
-          <dd>{{ formatNumber(record.totalWonBalls) }}玉</dd>
+          <dd class="text-right">{{ formatNumber(record.totalWonBalls) }}玉</dd>
           <dt class="text-zinc-500">最終持玉</dt>
-          <dd>{{ formatNumber(record.finalHeldBalls) }}玉</dd>
+          <dd class="text-right">{{ formatNumber(record.finalHeldBalls) }}玉</dd>
           <dt class="text-zinc-500">回転数</dt>
-          <dd>{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
+          <dd class="text-right">{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
           <dt class="text-zinc-500">RUSH当選数</dt>
-          <dd>{{ formatNumber(record.rushWinCount) }}</dd>
+          <dd class="text-right">{{ formatNumber(record.rushWinCount) }}</dd>
           <dt class="text-zinc-500">通常当選数</dt>
-          <dd>{{ formatNumber(record.normalWinCount) }}</dd>
+          <dd class="text-right">{{ formatNumber(record.normalWinCount) }}</dd>
           <dt class="text-zinc-500">チャージ当選数</dt>
-          <dd>{{ formatNumber(record.chargeWinCount) }}</dd>
+          <dd class="text-right">{{ formatNumber(record.chargeWinCount) }}</dd>
           <dt class="text-zinc-500">連荘数</dt>
-          <dd>{{ formatNumber(record.totalContinueCount) }}</dd>
+          <dd class="text-right">{{ formatNumber(record.totalContinueCount) }}</dd>
         </dl>
       </section>
 
@@ -154,7 +154,7 @@
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()
-const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, groupPeriodsByBigWin, validateRentalBallsForEnd } = useMetrics()
+const { calcDeemedInvestment, calcRotationsPer1000Yen, calcActualInvestment, calcNetInvestment, formatRotationsPer1000Yen, formatElapsedTime, groupPeriodsByBigWin, validateRentalBallsForEnd } = useMetrics()
 const { getWinTypeLabel } = useWinTypes()
 const { formatNumber } = useFormat()
 const toast = useToast()
@@ -204,8 +204,25 @@ const basicInfoInitial = computed(() => (record.value ? {
   balance: record.value.balance,
   finalHeldBalls: record.value.finalHeldBalls,
   totalInvestment: record.value.totalInvestment,
-  totalInvestedBalls: record.value.totalInvestedBalls
+  totalInvestedSavedBalls: record.value.totalInvestedSavedBalls
 } : null))
+
+const netInvestment = computed(() => calcNetInvestment({
+  investment: record.value?.totalInvestment ?? 0,
+  investedSavedBalls: record.value?.totalInvestedSavedBalls ?? 0,
+  exchangeRate: record.value?.exchangeRate ?? 0
+}))
+
+const totalActualInvestment = computed(() => calcActualInvestment({
+  investment: record.value?.totalInvestment ?? 0,
+  investedBalls: record.value?.totalInvestedBalls ?? 0,
+  exchangeRate: record.value?.exchangeRate ?? 0
+}))
+
+function formatInvestmentEquation(investmentAmount, ballsAmount, result) {
+  const sign = ballsAmount < 0 ? '-' : '+'
+  return `${formatNumber(investmentAmount)}円 ${sign} ${formatNumber(Math.abs(ballsAmount))}玉 = ${formatNumber(result)}円`
+}
 
 const isOwnSession = computed(() => recordingSession.isRecording && recordingSession.recordId === recordId)
 const isOtherSession = computed(() => recordingSession.isRecording && recordingSession.recordId !== recordId)

@@ -122,7 +122,7 @@
 import PlusIcon from '@primevue/icons/plus'
 import RefreshIcon from '@primevue/icons/refresh'
 
-const { calcBalance } = useMetrics()
+const { calcNetInvestment, calcBalance } = useMetrics()
 
 const props = defineProps({
   initial: { type: Object, default: null },
@@ -223,11 +223,15 @@ async function handleCreateMachine(machineData) {
 }
 
 function handleRecalculateBalance() {
+  const netInvestment = calcNetInvestment({
+    investment: props.initial?.totalInvestment ?? 0,
+    investedSavedBalls: props.initial?.totalInvestedSavedBalls ?? 0,
+    exchangeRate: exchangeRate.value
+  })
   balance.value = calcBalance({
     finalHeldBalls: props.initial?.finalHeldBalls ?? 0,
     exchangeRate: exchangeRate.value,
-    investment: props.initial?.totalInvestment ?? 0,
-    investedBalls: props.initial?.totalInvestedBalls ?? 0
+    netInvestment
   })
 }
 

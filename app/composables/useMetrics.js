@@ -33,6 +33,7 @@ export function useMetrics() {
     const totals = {
       totalInvestment: 0,
       totalInvestedBalls: 0,
+      totalInvestedSavedBalls: 0,
       finalHeldBalls: 0,
       totalRotations: 0,
       rushWinCount: 0,
@@ -41,6 +42,8 @@ export function useMetrics() {
       totalContinueCount: 0,
       totalWonBalls: 0
     }
+
+    let minEndHeldBalls = null
 
     for (const period of periods) {
       totals.totalInvestment += period.investment
@@ -52,6 +55,11 @@ export function useMetrics() {
       if (period.winType === 'rush') totals.rushWinCount += 1
       else if (period.winType === 'normal') totals.normalWinCount += 1
       else if (period.winType === 'charge') totals.chargeWinCount += 1
+      minEndHeldBalls = minEndHeldBalls === null ? period.endHeldBalls : Math.min(minEndHeldBalls, period.endHeldBalls)
+    }
+
+    if (periods.length > 0) {
+      totals.totalInvestedSavedBalls = Math.max(periods[0].startHeldBalls - minEndHeldBalls, 0)
     }
 
     const deemedInvestment = totals.totalInvestment + totals.totalInvestedBalls * 4
@@ -103,8 +111,12 @@ export function useMetrics() {
     })
   }
 
-  function calcBalance({ finalHeldBalls, exchangeRate, investment, investedBalls }) {
-    return Math.round(finalHeldBalls * exchangeRate - (investment + Math.max(investedBalls, 0) * exchangeRate))
+  function calcNetInvestment({ investment, investedSavedBalls, exchangeRate }) {
+    return calcActualInvestment({ investment, investedBalls: investedSavedBalls, exchangeRate })
+  }
+
+  function calcBalance({ finalHeldBalls, exchangeRate, netInvestment }) {
+    return Math.round(finalHeldBalls * exchangeRate - netInvestment)
   }
 
   function validateRentalBallsForEnd(period) {
@@ -117,5 +129,5 @@ export function useMetrics() {
       : '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
   }
 
-  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, calcBalance, validateRentalBallsForEnd }
+  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, calcNetInvestment, calcBalance, validateRentalBallsForEnd }
 }

@@ -22,6 +22,7 @@ async function handleCreate(basicInfo) {
       ...basicInfo,
       totalInvestment: 0,
       totalInvestedBalls: 0,
+      totalInvestedSavedBalls: 0,
       finalHeldBalls: 0,
       totalRotations: 0,
       totalRotationsPer1000Yen: 0,

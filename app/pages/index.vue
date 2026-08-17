@@ -94,7 +94,7 @@ const formattedInvestment = computed(() => {
   const investedBalls = record.value.totalInvestedBalls
   const actualInvestment = calcActualInvestment({ investment, investedBalls, exchangeRate: record.value.exchangeRate })
   const sign = investedBalls < 0 ? '-' : '+'
-  return `${formatNumber(actualInvestment)}円 (${formatNumber(investment)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉)`
+  return `${formatNumber(investment)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉 = ${formatNumber(actualInvestment)}円`
 })
 
 onMounted(() => {

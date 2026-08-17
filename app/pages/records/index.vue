@@ -68,7 +68,7 @@
       <Column header="投資/収支">
         <template #body="{ data }">
           <div class="flex flex-col text-right">
-            <span>{{ formatNumber(actualInvestment(data)) }}</span>
+            <span>{{ formatNumber(netInvestment(data)) }}</span>
             <span :class="balanceClass(data.balance)">{{ formatBalance(data.balance) }}</span>
           </div>
         </template>
@@ -99,7 +99,7 @@
 const route = useRoute()
 const router = useRouter()
 const recordingSession = useRecordingSessionStore()
-const { formatRotationsPer1000Yen, calcActualInvestment } = useMetrics()
+const { formatRotationsPer1000Yen, calcNetInvestment } = useMetrics()
 const { formatNumber } = useFormat()
 
 const records = ref([])
@@ -195,10 +195,10 @@ const filteredRows = computed(() => {
   })
 })
 
-function actualInvestment(row) {
-  return calcActualInvestment({
+function netInvestment(row) {
+  return calcNetInvestment({
     investment: row.totalInvestment,
-    investedBalls: row.totalInvestedBalls,
+    investedSavedBalls: row.totalInvestedSavedBalls,
     exchangeRate: row.exchangeRate
   })
 }

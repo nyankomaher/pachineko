@@ -147,6 +147,76 @@ describe('useMetrics', () => {
     expect(result.totalContinueCount).toBe(3)
     expect(result.totalWonBalls).toBe(1500)
     expect(result.totalRotationsPer1000Yen).toBeCloseTo(1000 / (13200 / 1000))
+    expect(result.totalInvestedSavedBalls).toBe(0)
+  })
+
+  it('calcRecordAggregates: 総投資貯玉は最初の区間実績の開始持玉と各区間実績の終了持玉の最小値から算出する', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const periods = [
+      {
+        investment: 0,
+        startHeldBalls: 1000,
+        endHeldBalls: 800,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      },
+      {
+        investment: 0,
+        startHeldBalls: 800,
+        endHeldBalls: 1500,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'rush',
+        continueCount: 1,
+        wonBalls: 700
+      },
+      {
+        investment: 0,
+        startHeldBalls: 1500,
+        endHeldBalls: 200,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      }
+    ]
+
+    const result = calcRecordAggregates(periods)
+
+    // max(最初の開始持玉1000 - min(終了持玉 800, 1500, 200), 0) = max(1000 - 200, 0) = 800
+    expect(result.totalInvestedSavedBalls).toBe(800)
+  })
+
+  it('calcRecordAggregates: 持玉が増加し続けた場合は総投資貯玉を0とする', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const periods = [
+      {
+        investment: 0,
+        startHeldBalls: 0,
+        endHeldBalls: 500,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'rush',
+        continueCount: 1,
+        wonBalls: 500
+      }
+    ]
+
+    const result = calcRecordAggregates(periods)
+
+    expect(result.totalInvestedSavedBalls).toBe(0)
   })
 
   it('calcRecordAggregates: 最後の区間実績に当選後持玉が入力されていれば最終持玉に優先反映する', () => {
@@ -201,6 +271,7 @@ describe('useMetrics', () => {
     expect(result.totalInvestment).toBe(0)
     expect(result.totalRotations).toBe(0)
     expect(result.totalRotationsPer1000Yen).toBe(0)
+    expect(result.totalInvestedSavedBalls).toBe(0)
   })
 
   it('groupPeriodsByBigWin: RUSH/通常ごとに区間実績をグルーピングし、チャージは区切りにしない', () => {
@@ -407,21 +478,26 @@ describe('useMetrics', () => {
     expect(resultWithCharge[1].investment).toBe(2000)
   })
 
-  it('calcBalance: 最終持玉の換算額から投資額を差し引いて収支を算出する', () => {
-    const { calcBalance } = useMetrics()
-    const result = calcBalance({ finalHeldBalls: 1000, exchangeRate: 3.5, investment: 3000, investedBalls: 500 })
-    expect(result).toBe(Math.round(1000 * 3.5 - (3000 + 500 * 3.5)))
+  it('calcNetInvestment: 総投資金額に総投資貯玉×交換レートを加算する', () => {
+    const { calcNetInvestment } = useMetrics()
+    const result = calcNetInvestment({ investment: 3000, investedSavedBalls: 500, exchangeRate: 3.5 })
+    expect(result).toBe(Math.round(3000 + 500 * 3.5))
   })
 
-  it('calcBalance: 投資玉数が負の場合は0未満を切り捨てて算出する', () => {
+  it('calcNetInvestment: 小数点以下は四捨五入する', () => {
+    const { calcNetInvestment } = useMetrics()
+    expect(calcNetInvestment({ investment: 100, investedSavedBalls: 1, exchangeRate: 3.55 })).toBe(104)
+  })
+
+  it('calcBalance: 最終持玉の換算額から純投資額を差し引いて収支を算出する', () => {
     const { calcBalance } = useMetrics()
-    const result = calcBalance({ finalHeldBalls: 500, exchangeRate: 4, investment: 3000, investedBalls: -200 })
-    expect(result).toBe(Math.round(500 * 4 - 3000))
+    const result = calcBalance({ finalHeldBalls: 1000, exchangeRate: 3.5, netInvestment: 4750 })
+    expect(result).toBe(Math.round(1000 * 3.5 - 4750))
   })
 
   it('calcBalance: 小数点以下は四捨五入する', () => {
     const { calcBalance } = useMetrics()
-    expect(calcBalance({ finalHeldBalls: 100, exchangeRate: 3.55, investment: 0, investedBalls: 0 })).toBe(Math.round(100 * 3.55))
+    expect(calcBalance({ finalHeldBalls: 100, exchangeRate: 3.55, netInvestment: 0 })).toBe(Math.round(100 * 3.55))
   })
 
   it('validateRentalBallsForEnd: 区間実績が無ければエラーなし', () => {

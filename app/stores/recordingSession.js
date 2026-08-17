@@ -24,13 +24,17 @@ export const useRecordingSessionStore = defineStore('recordingSession', {
 
     async finishRecording(recordId) {
       const db = useDb()
-      const { calcBalance } = useMetrics()
+      const { calcNetInvestment, calcBalance } = useMetrics()
       const record = await db.records.get(recordId)
+      const netInvestment = calcNetInvestment({
+        investment: record.totalInvestment,
+        investedSavedBalls: record.totalInvestedSavedBalls,
+        exchangeRate: record.exchangeRate
+      })
       const balance = calcBalance({
         finalHeldBalls: record.finalHeldBalls,
         exchangeRate: record.exchangeRate,
-        investment: record.totalInvestment,
-        investedBalls: record.totalInvestedBalls
+        netInvestment
       })
       await db.records.update(recordId, { endTime: new Date().toISOString(), balance })
       this.end()

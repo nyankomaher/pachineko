@@ -214,7 +214,7 @@ const cumulativeActualInvestment = computed(() => calcActualInvestment({
 
 function formatInvestmentBreakdown(investmentAmount, investedBalls, actualInvestment) {
   const sign = investedBalls < 0 ? '-' : '+'
-  return `${formatNumber(actualInvestment)}円 (${formatNumber(investmentAmount)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉)`
+  return `${formatNumber(investmentAmount)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉 = ${formatNumber(actualInvestment)}円`
 }
 
 const isValid = computed(() => (
