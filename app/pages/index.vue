@@ -58,6 +58,7 @@ const recordingSession = useRecordingSessionStore()
 
 const tabs = [
   { to: '/records/', label: '履歴' },
+  { to: '/calendar/', label: '収支カレンダー' },
   { to: '/analysis/', label: '分析' },
   { to: '/settings/', label: '設定' },
   { to: '/halls/', label: '店舗一覧' },
