@@ -16,19 +16,17 @@
       <Card>
         <template #title>記録中</template>
         <template #content>
-          <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            <dt class="text-zinc-500">台番号</dt>
-            <dd>{{ record?.machineNumber }}</dd>
+          <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             <dt class="text-zinc-500">機種名</dt>
-            <dd>{{ machineName }}</dd>
+            <dd class="text-right">{{ machineName }}</dd>
+            <dt class="text-zinc-500">台番号</dt>
+            <dd class="text-right">{{ record?.machineNumber }}</dd>
             <dt class="text-zinc-500">経過時間</dt>
-            <dd>{{ elapsedTimeLabel }}</dd>
+            <dd class="text-right">{{ elapsedTimeLabel }}</dd>
             <dt class="text-zinc-500">投資金額</dt>
-            <dd>{{ formatNumber(record?.totalInvestment) }}円</dd>
+            <dd class="text-right">{{ formattedInvestment }}</dd>
             <dt class="text-zinc-500">回転数</dt>
-            <dd>{{ formatNumber(record?.totalRotations) }}回転</dd>
-            <dt class="text-zinc-500">1000円あたり回転数</dt>
-            <dd>{{ formattedRotationsPer1000Yen }}回転</dd>
+            <dd class="text-right">{{ formatNumber(record?.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
           </dl>
         </template>
       </Card>
@@ -54,14 +52,13 @@ import { NuxtLink } from '#components'
 const recordingSession = useRecordingSessionStore()
 
 const tabs = [
-  { to: '/', label: 'TOP' },
   { to: '/records/', label: '履歴' },
   { to: '/analysis/', label: '分析' },
   { to: '/settings/', label: '設定' },
   { to: '/halls/', label: '店舗一覧' },
   { to: '/machines/', label: '機種一覧' }
 ]
-const { formatRotationsPer1000Yen, formatElapsedTime } = useMetrics()
+const { formatRotationsPer1000Yen, formatElapsedTime, calcActualInvestment } = useMetrics()
 const { formatNumber } = useFormat()
 
 const record = ref(null)
@@ -85,6 +82,15 @@ async function loadRecord() {
 const elapsedTimeLabel = computed(() => formatElapsedTime(record.value?.startTime, now.value))
 
 const formattedRotationsPer1000Yen = computed(() => formatRotationsPer1000Yen(record.value?.totalRotationsPer1000Yen))
+
+const formattedInvestment = computed(() => {
+  if (!record.value) return ''
+  const investment = record.value.totalInvestment
+  const investedBalls = record.value.totalInvestedBalls
+  const actualInvestment = calcActualInvestment({ investment, investedBalls, exchangeRate: record.value.exchangeRate })
+  const sign = investedBalls < 0 ? '-' : '+'
+  return `${formatNumber(actualInvestment)}円 (${formatNumber(investment)}円 ${sign} ${formatNumber(Math.abs(investedBalls))}玉)`
+})
 
 onMounted(() => {
   loadRecord()
