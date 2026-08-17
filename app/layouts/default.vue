@@ -21,6 +21,14 @@
     <Drawer v-model:visible="navVisible" position="left" header="メニュー" class="w-64">
       <nav class="flex flex-col gap-1">
         <NuxtLink
+          v-if="recordingSession.isRecording"
+          :to="`/records/${recordingSession.recordId}/create`"
+          class="mb-2"
+          @click="navVisible = false"
+        >
+          <Button label="記録継続" fluid />
+        </NuxtLink>
+        <NuxtLink
           v-for="tab in tabs"
           :key="tab.to"
           :to="tab.to"
@@ -39,6 +47,7 @@
 import BarsIcon from '@primevue/icons/bars'
 import TimesIcon from '@primevue/icons/times'
 
+const recordingSession = useRecordingSessionStore()
 const navVisible = ref(false)
 
 const tabs = [
