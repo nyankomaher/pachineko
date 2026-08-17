@@ -29,7 +29,8 @@ async function handleCreate(basicInfo) {
       normalWinCount: 0,
       chargeWinCount: 0,
       totalContinueCount: 0,
-      totalWonBalls: 0
+      totalWonBalls: 0,
+      includeChargeInBigWin: false
     })
     recordingSession.start(recordId)
     await navigateTo(`/records/${recordId}/create`)

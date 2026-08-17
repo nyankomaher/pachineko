@@ -360,6 +360,53 @@ describe('useMetrics', () => {
     expect(groupPeriodsByBigWin([])).toEqual([])
   })
 
+  it('groupPeriodsByBigWin: includeChargeがtrueならチャージ当選も区切りとみなす', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    const periods = [
+      {
+        startTime: '2026-08-10T10:00:00.000Z',
+        endTime: '2026-08-10T10:10:00.000Z',
+        investment: 1000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'charge',
+        continueCount: 0,
+        wonBalls: 300
+      },
+      {
+        startTime: '2026-08-10T10:10:00.000Z',
+        endTime: '2026-08-10T10:20:00.000Z',
+        investment: 2000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 100,
+        endRotations: 200,
+        winType: 'rush',
+        continueCount: 3,
+        wonBalls: 1500
+      }
+    ]
+
+    const resultWithoutCharge = groupPeriodsByBigWin(periods, false)
+    expect(resultWithoutCharge).toHaveLength(1)
+    expect(resultWithoutCharge[0].winType).toBe('rush')
+    expect(resultWithoutCharge[0].investment).toBe(3000)
+
+    const resultWithCharge = groupPeriodsByBigWin(periods, true)
+    expect(resultWithCharge).toHaveLength(2)
+    expect(resultWithCharge[0].winType).toBe('charge')
+    expect(resultWithCharge[0].investment).toBe(1000)
+    expect(resultWithCharge[0].wonBalls).toBe(300)
+    expect(resultWithCharge[1].winType).toBe('rush')
+    expect(resultWithCharge[1].investment).toBe(2000)
+  })
+
   it('validateRentalBallsForEnd: 区間実績が無ければエラーなし', () => {
     const { validateRentalBallsForEnd } = useMetrics()
     expect(validateRentalBallsForEnd(null)).toBeNull()

@@ -41,7 +41,11 @@
 
       <section v-if="bigWinGroups.length > 0" class="flex flex-col gap-2">
         <h2 class="font-semibold">当選実績</h2>
-        <DataTable :value="bigWinGroups" data-key="startTime" class="periods-table">
+        <div class="flex items-center gap-2">
+          <ToggleSwitch input-id="include-charge-toggle" :model-value="record.includeChargeInBigWin" @update:model-value="handleToggleIncludeCharge" />
+          <label for="include-charge-toggle">チャージを含める</label>
+        </div>
+        <DataTable :value="bigWinGroups" data-key="startTime" scrollable class="periods-table">
           <Column header="当選">
             <template #body="{ data }">
               <div class="flex flex-col">
@@ -81,6 +85,7 @@
         <DataTable
           :value="periods"
           data-key="id"
+          scrollable
           class="periods-table cursor-pointer"
           @row-click="goToPeriod"
         >
@@ -211,7 +216,13 @@ const elapsedTimeLabel = computed(() => {
   return formatElapsedTime(record.value?.startTime, end)
 })
 
-const bigWinGroups = computed(() => groupPeriodsByBigWin(periods.value))
+const bigWinGroups = computed(() => groupPeriodsByBigWin(periods.value, record.value?.includeChargeInBigWin ?? false))
+
+async function handleToggleIncludeCharge(value) {
+  const db = useDb()
+  await db.records.update(recordId, { includeChargeInBigWin: value })
+  record.value.includeChargeInBigWin = value
+}
 
 const formattedRotationsPer1000Yen = computed(() => formatRotationsPer1000Yen(record.value?.totalRotationsPer1000Yen))
 
@@ -300,6 +311,11 @@ async function handleDelete() {
 </script>
 
 <style scoped>
+:deep(.periods-table th),
+:deep(.periods-table td) {
+  white-space: nowrap;
+}
+
 @media (min-width: 1024px) {
   :deep(.periods-table .p-datatable-table) {
     width: auto;

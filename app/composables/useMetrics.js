@@ -60,13 +60,17 @@ export function useMetrics() {
     return totals
   }
 
-  function groupPeriodsByBigWin(periods) {
+  function isBigWin(winType, includeCharge) {
+    return winType === 'rush' || winType === 'normal' || (includeCharge && winType === 'charge')
+  }
+
+  function groupPeriodsByBigWin(periods, includeCharge = false) {
     const groups = []
     let current = []
 
     for (const period of periods) {
       current.push(period)
-      if (period.winType === 'rush' || period.winType === 'normal') {
+      if (isBigWin(period.winType, includeCharge)) {
         groups.push(current)
         current = []
       }
@@ -83,7 +87,7 @@ export function useMetrics() {
       const wonBalls = group.reduce((sum, period) => sum + period.wonBalls, 0)
       const deemedInvestment = investment + investedBalls * 4
       const last = group[group.length - 1]
-      const winType = (last.winType === 'rush' || last.winType === 'normal') ? last.winType : 'none'
+      const winType = isBigWin(last.winType, includeCharge) ? last.winType : 'none'
 
       return {
         startTime: group[0].startTime,
