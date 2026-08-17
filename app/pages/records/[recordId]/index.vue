@@ -22,7 +22,7 @@
           <dd>{{ formatNumber(record.totalInvestment) }}円</dd>
           <dt class="text-zinc-500">投資持玉</dt>
           <dd>{{ formatNumber(record.totalInvestedBalls) }}玉</dd>
-          <dt class="text-zinc-500">獲得玉数</dt>
+          <dt class="text-zinc-500">出玉</dt>
           <dd>{{ formatNumber(record.totalWonBalls) }}玉</dd>
           <dt class="text-zinc-500">最終持玉</dt>
           <dd>{{ formatNumber(record.finalHeldBalls) }}玉</dd>
@@ -54,7 +54,7 @@
               </div>
             </template>
           </Column>
-          <Column header="獲得玉数">
+          <Column header="出玉">
             <template #body="{ data }">
               <div class="text-right">
                 <span>{{ formatNumber(data.wonBalls) }}玉</span>

@@ -338,7 +338,7 @@ npm run test     # Vitestによるテスト実行
 | 通常当選数 | normalWinCount |
 | チャージ当選数 | chargeWinCount |
 | 総連荘数 | totalContinueCount |
-| 総獲得玉数 | totalWonBalls |
+| 総出玉 | totalWonBalls |
 | チャージを含める | includeChargeInBigWin |
 
 ## periods（区間実績）
@@ -358,6 +358,6 @@ npm run test     # Vitestによるテスト実行
 | 終了回転数 | endRotations |
 | 当選種別 | winType |
 | 連荘数 | continueCount |
-| 獲得玉数 | wonBalls |
+| 出玉 | wonBalls |
 | 当選後持玉 | postWinHeldBalls |
 | 当選後貸玉 | postWinRentalBalls |

@@ -93,7 +93,7 @@
           <InputNumber id="period-continue-count" :model-value="continueCount" :use-grouping="false" fluid @input="continueCount = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
-          <label for="period-won-balls">獲得玉数</label>
+          <label for="period-won-balls">出玉</label>
           <InputNumber id="period-won-balls" :model-value="wonBalls" :use-grouping="false" fluid @input="wonBalls = $event.value" />
         </div>
       </div>
