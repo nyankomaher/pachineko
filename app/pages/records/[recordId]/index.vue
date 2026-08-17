@@ -39,6 +39,43 @@
         </dl>
       </section>
 
+      <section v-if="bigWinGroups.length > 0" class="flex flex-col gap-2">
+        <h2 class="font-semibold">当選実績</h2>
+        <DataTable :value="bigWinGroups" data-key="startTime" class="periods-table">
+          <Column header="当選">
+            <template #body="{ data }">
+              <div class="flex flex-col">
+                <span>{{ getWinTypeLabel(data.winType) }}</span>
+                <span v-if="winContinueLabel(data)">{{ winContinueLabel(data) }}</span>
+              </div>
+            </template>
+          </Column>
+          <Column header="獲得玉数">
+            <template #body="{ data }">
+              <div class="text-right">
+                <span>{{ formatNumber(data.wonBalls) }}玉</span>
+              </div>
+            </template>
+          </Column>
+          <Column header="投資">
+            <template #body="{ data }">
+              <div class="flex flex-col text-right">
+                <span>{{ formatNumber(data.investment) }}円</span>
+                <span>{{ formatNumber(data.investedBalls) }}玉</span>
+              </div>
+            </template>
+          </Column>
+          <Column header="回転">
+            <template #body="{ data }">
+              <div class="flex flex-col text-right">
+                <span>{{ formatNumber(data.rotations) }}</span>
+                <span>{{ formatRotationsPer1000Yen(data.rotationsPer1000Yen) }}</span>
+              </div>
+            </template>
+          </Column>
+        </DataTable>
+      </section>
+
       <section class="flex flex-col gap-2">
         <h2 class="font-semibold">区間実績</h2>
         <DataTable
@@ -112,7 +149,7 @@
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()
-const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, validateRentalBallsForEnd } = useMetrics()
+const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, groupPeriodsByBigWin, validateRentalBallsForEnd } = useMetrics()
 const { getWinTypeLabel } = useWinTypes()
 const { formatNumber } = useFormat()
 
@@ -173,6 +210,8 @@ const elapsedTimeLabel = computed(() => {
   const end = record.value?.endTime ? new Date(record.value.endTime) : now.value
   return formatElapsedTime(record.value?.startTime, end)
 })
+
+const bigWinGroups = computed(() => groupPeriodsByBigWin(periods.value))
 
 const formattedRotationsPer1000Yen = computed(() => formatRotationsPer1000Yen(record.value?.totalRotationsPer1000Yen))
 

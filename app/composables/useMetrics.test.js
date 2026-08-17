@@ -203,6 +203,163 @@ describe('useMetrics', () => {
     expect(result.totalRotationsPer1000Yen).toBe(0)
   })
 
+  it('groupPeriodsByBigWin: RUSH/通常ごとに区間実績をグルーピングし、チャージは区切りにしない', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    const periods = [
+      {
+        startTime: '2026-08-10T10:00:00.000Z',
+        endTime: '2026-08-10T10:10:00.000Z',
+        investment: 1000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      },
+      {
+        startTime: '2026-08-10T10:10:00.000Z',
+        endTime: '2026-08-10T10:20:00.000Z',
+        investment: 2000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 100,
+        endRotations: 200,
+        winType: 'rush',
+        continueCount: 3,
+        wonBalls: 1500
+      },
+      {
+        startTime: '2026-08-10T10:20:00.000Z',
+        endTime: '2026-08-10T10:25:00.000Z',
+        investment: 0,
+        startHeldBalls: 500,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 50,
+        winType: 'charge',
+        continueCount: 0,
+        wonBalls: 500
+      },
+      {
+        startTime: '2026-08-10T10:25:00.000Z',
+        endTime: '2026-08-10T10:30:00.000Z',
+        investment: 500,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 50,
+        endRotations: 150,
+        winType: 'normal',
+        continueCount: 2,
+        wonBalls: 800
+      }
+    ]
+
+    const result = groupPeriodsByBigWin(periods)
+
+    expect(result).toHaveLength(2)
+
+    expect(result[0].startTime).toBe('2026-08-10T10:00:00.000Z')
+    expect(result[0].endTime).toBe('2026-08-10T10:20:00.000Z')
+    expect(result[0].investment).toBe(3000)
+    expect(result[0].rotations).toBe(200)
+    expect(result[0].winType).toBe('rush')
+    expect(result[0].continueCount).toBe(3)
+    expect(result[0].wonBalls).toBe(1500)
+
+    expect(result[1].startTime).toBe('2026-08-10T10:20:00.000Z')
+    expect(result[1].endTime).toBe('2026-08-10T10:30:00.000Z')
+    expect(result[1].investment).toBe(500)
+    expect(result[1].investedBalls).toBe(500)
+    expect(result[1].rotations).toBe(150)
+    expect(result[1].winType).toBe('normal')
+    expect(result[1].continueCount).toBe(2)
+    expect(result[1].wonBalls).toBe(1300)
+  })
+
+  it('groupPeriodsByBigWin: 大当たりせず終了した場合は末尾の区間実績を「なし」の当選実績として追加する', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    const periods = [
+      {
+        startTime: '2026-08-10T10:00:00.000Z',
+        endTime: '2026-08-10T10:10:00.000Z',
+        investment: 1000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'rush',
+        continueCount: 1,
+        wonBalls: 1000
+      },
+      {
+        startTime: '2026-08-10T10:10:00.000Z',
+        endTime: '2026-08-10T10:20:00.000Z',
+        investment: 2000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 100,
+        endRotations: 150,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      }
+    ]
+
+    const result = groupPeriodsByBigWin(periods)
+
+    expect(result).toHaveLength(2)
+    expect(result[0].winType).toBe('rush')
+    expect(result[1].winType).toBe('none')
+    expect(result[1].investment).toBe(2000)
+    expect(result[1].startTime).toBe('2026-08-10T10:10:00.000Z')
+    expect(result[1].endTime).toBe('2026-08-10T10:20:00.000Z')
+    expect(result[1].wonBalls).toBe(0)
+  })
+
+  it('groupPeriodsByBigWin: 大当たりが1件も無ければ全区間実績を1件の「なし」当選実績にまとめる', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    const periods = [
+      {
+        startTime: '2026-08-10T10:00:00.000Z',
+        endTime: '2026-08-10T10:10:00.000Z',
+        investment: 1000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      }
+    ]
+
+    const result = groupPeriodsByBigWin(periods)
+
+    expect(result).toHaveLength(1)
+    expect(result[0].winType).toBe('none')
+  })
+
+  it('groupPeriodsByBigWin: 区間実績が無ければ空配列を返す', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    expect(groupPeriodsByBigWin([])).toEqual([])
+  })
+
   it('validateRentalBallsForEnd: 区間実績が無ければエラーなし', () => {
     const { validateRentalBallsForEnd } = useMetrics()
     expect(validateRentalBallsForEnd(null)).toBeNull()

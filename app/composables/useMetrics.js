@@ -60,6 +60,45 @@ export function useMetrics() {
     return totals
   }
 
+  function groupPeriodsByBigWin(periods) {
+    const groups = []
+    let current = []
+
+    for (const period of periods) {
+      current.push(period)
+      if (period.winType === 'rush' || period.winType === 'normal') {
+        groups.push(current)
+        current = []
+      }
+    }
+    if (current.length > 0) {
+      groups.push(current)
+    }
+
+    return groups.map((group) => {
+      const investment = group.reduce((sum, period) => sum + period.investment, 0)
+      const investedBalls = group.reduce((sum, period) => sum + calcInvestedBalls(period), 0)
+      const rotations = group.reduce((sum, period) => sum + (period.endRotations - period.startRotations), 0)
+      const continueCount = group.reduce((sum, period) => sum + period.continueCount, 0)
+      const wonBalls = group.reduce((sum, period) => sum + period.wonBalls, 0)
+      const deemedInvestment = investment + investedBalls * 4
+      const last = group[group.length - 1]
+      const winType = (last.winType === 'rush' || last.winType === 'normal') ? last.winType : 'none'
+
+      return {
+        startTime: group[0].startTime,
+        endTime: last.endTime,
+        investment,
+        investedBalls,
+        rotations,
+        rotationsPer1000Yen: calcRotationsPer1000Yen(rotations, deemedInvestment),
+        winType,
+        wonBalls,
+        continueCount
+      }
+    })
+  }
+
   function validateRentalBallsForEnd(period) {
     if (!period) return null
     const usesPostWin = period.postWinRentalBalls != null
@@ -70,5 +109,5 @@ export function useMetrics() {
       : '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
   }
 
-  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, validateRentalBallsForEnd }
+  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, validateRentalBallsForEnd }
 }
