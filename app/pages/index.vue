@@ -33,6 +33,18 @@
         </template>
       </Card>
     </NuxtLink>
+
+    <nav class="mt-16 flex w-full max-w-sm flex-col gap-1">
+      <NuxtLink
+        v-for="tab in tabs"
+        :key="tab.to"
+        :to="tab.to"
+        class="rounded px-3 py-2 text-center text-zinc-700 dark:text-zinc-300"
+        active-class="font-semibold text-[var(--p-primary-color)]"
+      >
+        {{ tab.label }}
+      </NuxtLink>
+    </nav>
   </div>
 </template>
 
@@ -40,6 +52,15 @@
 import { NuxtLink } from '#components'
 
 const recordingSession = useRecordingSessionStore()
+
+const tabs = [
+  { to: '/', label: 'TOP' },
+  { to: '/records/', label: '履歴' },
+  { to: '/analysis/', label: '分析' },
+  { to: '/settings/', label: '設定' },
+  { to: '/halls/', label: '店舗一覧' },
+  { to: '/machines/', label: '機種一覧' }
+]
 const { formatRotationsPer1000Yen, formatElapsedTime } = useMetrics()
 const { formatNumber } = useFormat()
 
