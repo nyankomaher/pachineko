@@ -29,6 +29,14 @@
           <Button label="記録継続" fluid />
         </NuxtLink>
         <NuxtLink
+          v-else
+          to="/records/create"
+          class="mb-2"
+          @click="navVisible = false"
+        >
+          <Button label="記録開始" fluid />
+        </NuxtLink>
+        <NuxtLink
           v-for="tab in tabs"
           :key="tab.to"
           :to="tab.to"

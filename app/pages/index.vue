@@ -4,7 +4,7 @@
       v-if="!recordingSession.isRecording"
       :as="NuxtLink"
       to="/records/create"
-      label="記録を始める"
+      label="記録開始"
       size="large"
     />
 
