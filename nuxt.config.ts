@@ -10,6 +10,8 @@ export default defineNuxtConfig({
     port: 54080
   },
 
+  css: ['~/assets/css/main.css'],
+
   modules: [
     '@pinia/nuxt',
     '@primevue/nuxt-module',
