@@ -144,10 +144,69 @@ describe('useMetrics', () => {
     expect(result.rushWinCount).toBe(1)
     expect(result.normalWinCount).toBe(0)
     expect(result.chargeWinCount).toBe(1)
-    expect(result.totalContinueCount).toBe(3)
+    expect(result.totalBigWinCount).toBe(3)
     expect(result.totalWonBalls).toBe(1500)
     expect(result.totalRotationsPer1000Yen).toBeCloseTo(1000 / (13200 / 1000))
     expect(result.totalInvestedSavedBalls).toBe(0)
+  })
+
+  it('calcRecordAggregates: 大当たりは当選種別によらず各区間実績の連荘数を単純合計する', () => {
+    const { calcRecordAggregates } = useMetrics()
+    const periods = [
+      {
+        investment: 0,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'rush',
+        continueCount: 3,
+        wonBalls: 0
+      },
+      {
+        investment: 0,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'normal',
+        continueCount: 2,
+        wonBalls: 0
+      },
+      {
+        investment: 0,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'charge',
+        continueCount: 5,
+        wonBalls: 0
+      },
+      {
+        investment: 0,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      }
+    ]
+
+    const result = calcRecordAggregates(periods)
+
+    // rush(3) + normal(2) + charge(5) + none(0) = 10
+    expect(result.totalBigWinCount).toBe(10)
   })
 
   it('calcRecordAggregates: 総投資貯玉は最初の区間実績の開始持玉と各区間実績の終了持玉の最小値から算出する', () => {

@@ -158,7 +158,9 @@ const postWinRentalBalls = ref(props.initial?.postWinRentalBalls ?? null)
 const submitting = ref(false)
 
 watch(winType, (newType) => {
-  if ((newType === 'rush' || newType === 'normal') && !continueCount.value) {
+  if (newType === 'none') {
+    continueCount.value = 0
+  } else if ((continueCount.value ?? 0) < 1) {
     continueCount.value = 1
   }
 })

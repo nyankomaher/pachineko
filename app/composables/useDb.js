@@ -34,6 +34,20 @@ export function useDb() {
         await tx.table('records').update(record.id, { totalInvestedSavedBalls })
       }))
     })
+    db.version(4).stores({
+      halls: '++id, name, order',
+      machines: '++id, name, order',
+      records: '++id, hallId, machineId',
+      periods: '++id, recordId'
+    }).upgrade(async (tx) => {
+      const { calcRecordAggregates } = useMetrics()
+      const records = await tx.table('records').toArray()
+      await Promise.all(records.map(async (record) => {
+        const periods = await tx.table('periods').where('recordId').equals(record.id).sortBy('startTime')
+        const { totalBigWinCount } = calcRecordAggregates(periods)
+        await tx.table('records').update(record.id, { totalBigWinCount })
+      }))
+    })
   }
   return db
 }

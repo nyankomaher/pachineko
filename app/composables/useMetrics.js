@@ -39,7 +39,7 @@ export function useMetrics() {
       rushWinCount: 0,
       normalWinCount: 0,
       chargeWinCount: 0,
-      totalContinueCount: 0,
+      totalBigWinCount: 0,
       totalWonBalls: 0
     }
 
@@ -50,8 +50,8 @@ export function useMetrics() {
       totals.totalInvestedBalls += (period.startHeldBalls - period.endHeldBalls) + (period.startRentalBalls - period.endRentalBalls)
       totals.totalRotations += period.endRotations - period.startRotations
       totals.finalHeldBalls = period.postWinHeldBalls != null ? period.postWinHeldBalls : period.endHeldBalls
-      totals.totalContinueCount += period.continueCount
       totals.totalWonBalls += period.wonBalls
+      totals.totalBigWinCount += period.continueCount
       if (period.winType === 'rush') totals.rushWinCount += 1
       else if (period.winType === 'normal') totals.normalWinCount += 1
       else if (period.winType === 'charge') totals.chargeWinCount += 1

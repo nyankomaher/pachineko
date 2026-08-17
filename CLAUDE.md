@@ -83,6 +83,9 @@ UC1で記録したデータを一覧で表示する。
   当選によらない区切りの場合、「なし」を記録する。
   DB上はIDで管理し、表示名は定数として定義する。
 
+大当たり
+: 各区間実績の連荘数の合計。
+
 交換レート
 : 実績ごとに設定する、1玉あたりの交換金額（円/玉）。実績テーブルに保持する。
 
@@ -344,10 +347,10 @@ npm run test     # Vitestによるテスト実行
 | 収支 | balance |
 | 総回転数 | totalRotations |
 | 総1000円あたり回転数 | totalRotationsPer1000Yen |
-| RUSH当選数 | rushWinCount |
-| 通常当選数 | normalWinCount |
-| チャージ当選数 | chargeWinCount |
-| 総連荘数 | totalContinueCount |
+| RUSH | rushWinCount |
+| 通常 | normalWinCount |
+| チャージ | chargeWinCount |
+| 大当たり | totalBigWinCount |
 | 総出玉 | totalWonBalls |
 | チャージを含める | includeChargeInBigWin |
 

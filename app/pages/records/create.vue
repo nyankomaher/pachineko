@@ -29,7 +29,7 @@ async function handleCreate(basicInfo) {
       rushWinCount: 0,
       normalWinCount: 0,
       chargeWinCount: 0,
-      totalContinueCount: 0,
+      totalBigWinCount: 0,
       totalWonBalls: 0,
       includeChargeInBigWin: false
     })

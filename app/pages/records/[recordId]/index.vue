@@ -28,14 +28,14 @@
           <dd class="text-right">{{ formatNumber(record.finalHeldBalls) }}玉</dd>
           <dt class="text-zinc-500">回転数</dt>
           <dd class="text-right">{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
-          <dt class="text-zinc-500">RUSH当選数</dt>
+          <dt class="text-zinc-500">RUSH</dt>
           <dd class="text-right">{{ formatNumber(record.rushWinCount) }}</dd>
-          <dt class="text-zinc-500">通常当選数</dt>
+          <dt class="text-zinc-500">通常</dt>
           <dd class="text-right">{{ formatNumber(record.normalWinCount) }}</dd>
-          <dt class="text-zinc-500">チャージ当選数</dt>
+          <dt class="text-zinc-500">チャージ</dt>
           <dd class="text-right">{{ formatNumber(record.chargeWinCount) }}</dd>
-          <dt class="text-zinc-500">連荘数</dt>
-          <dd class="text-right">{{ formatNumber(record.totalContinueCount) }}</dd>
+          <dt class="text-zinc-500">大当たり</dt>
+          <dd class="text-right">{{ formatNumber(record.totalBigWinCount) }}</dd>
         </dl>
       </section>
 
