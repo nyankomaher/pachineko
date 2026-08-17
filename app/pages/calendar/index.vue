@@ -171,8 +171,8 @@ function formatBalance(value) {
 
 function balanceClass(value) {
   const num = value ?? 0
-  if (num > 0) return 'text-red-600 dark:text-red-400'
-  if (num < 0) return 'text-blue-600 dark:text-blue-400'
+  if (num > 0) return 'text-blue-600 dark:text-blue-400'
+  if (num < 0) return 'text-red-600 dark:text-red-400'
   return ''
 }
 
