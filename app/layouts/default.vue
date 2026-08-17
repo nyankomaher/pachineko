@@ -17,7 +17,9 @@
     </Button>
 
     <main class="flex flex-1 flex-col overflow-y-auto">
-      <slot />
+      <div class="mx-auto flex w-full flex-1 flex-col" :class="{ 'max-w-3xl': !route.meta.fullWidth }">
+        <slot />
+      </div>
     </main>
 
     <Drawer v-model:visible="navVisible" position="left" header="メニュー" class="w-64">
@@ -57,6 +59,7 @@
 import BarsIcon from '@primevue/icons/bars'
 import TimesIcon from '@primevue/icons/times'
 
+const route = useRoute()
 const recordingSession = useRecordingSessionStore()
 const navVisible = ref(false)
 
