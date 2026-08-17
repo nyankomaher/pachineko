@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import Aura from '@primeuix/themes/aura'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
@@ -6,8 +7,18 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   ssr: false,
 
+  app: {
+    baseURL: '/pachineko/'
+  },
+
   devServer: {
     port: 54080
+  },
+
+  nitro: {
+    output: {
+      publicDir: fileURLToPath(new URL('./docs', import.meta.url))
+    }
   },
 
   css: ['~/assets/css/main.css'],

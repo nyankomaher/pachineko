@@ -112,8 +112,10 @@ npm run test     # Vitestによるテスト実行
 - データはIndexedDBに記録します。
   - IndexedDBのラッパーとしてDexie.jsを使用します。
 - デザインシステムとしてPrimeVueを採用します（`@primevue/nuxt-module` 経由で導入）。履歴タブの表（DataTable）、分析タブのグラフ（Chart）を含め、UI全体をPrimeVueのコンポーネントで統一します。
-- github pagesにデプロイする想定です。
-  - 404.htmlとindex.htmlを同内容にし、下層への直接アクセス時やリロード時にもページが表示されるようにします。
+- github pagesにデプロイします。公開パスは `/pachineko/` とし、`nuxt.config.ts` の `app.baseURL` に設定します。
+  - `npm run generate` の生成物は `docs/` ディレクトリに出力し（`nitro.output.publicDir`）、mainブランチの `/docs` を配信元とするGitHub Pages設定を想定します。
+  - 404.htmlとindex.htmlを同内容にし、下層への直接アクセス時やリロード時にもページが表示されるようにします（`npm run generate` 実行後、`scripts/copy-404.mjs` が `docs/index.html` を `docs/404.html` としてコピーします）。
+  - Jekyllによる `_nuxt/` 等アンダースコア始まりディレクトリの除外を防ぐため、`public/.nojekyll`（空ファイル）を生成物に含めます。
 - TypeScriptは使用せず、Javascriptを使用します。
 - CSSにはTailwindを使用します。
 - PWA化します(`@vite-pwa/nuxt` 経由で導入)。ホーム画面に追加してアプリのように起動できるようにします。
