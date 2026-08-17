@@ -23,6 +23,7 @@
 <script setup>
 const route = useRoute()
 const machineId = Number(route.params.machineId)
+const toast = useToast()
 
 const machine = ref(null)
 const updating = ref(false)
@@ -42,6 +43,7 @@ async function handleUpdate(machineData) {
     const db = useDb()
     await db.machines.update(machineId, machineData)
     await load()
+    toast.add({ severity: 'success', summary: '修正しました', life: 3000 })
   } finally {
     updating.value = false
   }

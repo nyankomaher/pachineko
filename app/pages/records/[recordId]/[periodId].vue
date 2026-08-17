@@ -32,6 +32,7 @@ const route = useRoute()
 const recordId = Number(route.params.recordId)
 const periodId = Number(route.params.periodId)
 const { calcRecordAggregates } = useMetrics()
+const toast = useToast()
 
 const record = ref(null)
 const period = ref(null)
@@ -76,7 +77,8 @@ async function handleUpdate(periodData) {
     const periods = await db.periods.where('recordId').equals(recordId).sortBy('startTime')
     const aggregates = calcRecordAggregates(periods)
     await db.records.update(recordId, aggregates)
-    await navigateTo(`/records/${recordId}`)
+    await load()
+    toast.add({ severity: 'success', summary: '修正しました', life: 3000 })
   } finally {
     saving.value = false
   }

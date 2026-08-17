@@ -157,6 +157,7 @@ const recordingSession = useRecordingSessionStore()
 const { calcDeemedInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, groupPeriodsByBigWin, validateRentalBallsForEnd } = useMetrics()
 const { getWinTypeLabel } = useWinTypes()
 const { formatNumber } = useFormat()
+const toast = useToast()
 
 const record = ref(null)
 const periods = ref([])
@@ -288,6 +289,7 @@ async function handleUpdate(basicInfo) {
     const db = useDb()
     await db.records.update(recordId, basicInfo)
     await loadRecord()
+    toast.add({ severity: 'success', summary: '修正しました', life: 3000 })
   } finally {
     updating.value = false
   }

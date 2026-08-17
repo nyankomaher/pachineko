@@ -23,6 +23,7 @@
 <script setup>
 const route = useRoute()
 const hallId = Number(route.params.hallId)
+const toast = useToast()
 
 const hall = ref(null)
 const updating = ref(false)
@@ -42,6 +43,7 @@ async function handleUpdate(hallData) {
     const db = useDb()
     await db.halls.update(hallId, hallData)
     await load()
+    toast.add({ severity: 'success', summary: '修正しました', life: 3000 })
   } finally {
     updating.value = false
   }
