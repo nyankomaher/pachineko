@@ -96,6 +96,8 @@
 </template>
 
 <script setup>
+const route = useRoute()
+const router = useRouter()
 const recordingSession = useRecordingSessionStore()
 const { formatRotationsPer1000Yen, calcActualInvestment } = useMetrics()
 const { formatNumber } = useFormat()
@@ -104,13 +106,6 @@ const records = ref([])
 const halls = ref([])
 const machines = ref([])
 
-const dateFromFilter = ref(null)
-const dateToFilter = ref(null)
-const hallFilter = ref('')
-const machineFilter = ref('')
-const hallSuggestions = ref([])
-const machineSuggestions = ref([])
-
 function toDateOnlyString(value) {
   if (!value) return null
   const y = value.getFullYear()
@@ -118,6 +113,28 @@ function toDateOnlyString(value) {
   const d = String(value.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
+
+function parseDateOnly(value) {
+  return value ? new Date(`${value}T00:00:00`) : null
+}
+
+const dateFromFilter = ref(parseDateOnly(route.query.dateFrom))
+const dateToFilter = ref(parseDateOnly(route.query.dateTo))
+const hallFilter = ref(route.query.hall ?? '')
+const machineFilter = ref(route.query.machine ?? '')
+const hallSuggestions = ref([])
+const machineSuggestions = ref([])
+
+watch([dateFromFilter, dateToFilter, hallFilter, machineFilter], () => {
+  const query = {}
+  const fromValue = toDateOnlyString(dateFromFilter.value)
+  const toValue = toDateOnlyString(dateToFilter.value)
+  if (fromValue) query.dateFrom = fromValue
+  if (toValue) query.dateTo = toValue
+  if (hallFilter.value) query.hall = hallFilter.value
+  if (machineFilter.value) query.machine = machineFilter.value
+  router.replace({ query })
+})
 
 function dateYear(dateStr) {
   return dateStr.split('-')[0]
