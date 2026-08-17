@@ -13,8 +13,13 @@
       :to="`/records/${recordingSession.recordId}/create`"
       class="block w-full max-w-sm"
     >
-      <Card>
-        <template #title>記録中</template>
+      <Card class="border-2 border-[var(--p-primary-color)] shadow-lg">
+        <template #title>
+          <div class="flex items-center gap-2 text-[var(--p-primary-color)]">
+            <span class="h-3 w-3 rounded-full bg-[var(--p-primary-color)]" />
+            <span>記録中</span>
+          </div>
+        </template>
         <template #content>
           <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
             <dt class="text-zinc-500">機種名</dt>
