@@ -36,6 +36,7 @@ const toast = useToast()
 
 const record = ref(null)
 const period = ref(null)
+const periodsBeforeThis = ref([])
 const periodNumber = ref(null)
 const saving = ref(false)
 const deleteDialogVisible = ref(false)
@@ -51,6 +52,7 @@ async function load() {
   period.value = fetchedPeriod
   const index = periods.findIndex((p) => p.id === periodId)
   periodNumber.value = index === -1 ? null : index + 1
+  periodsBeforeThis.value = index === -1 ? [] : periods.slice(0, index)
 }
 
 onMounted(load)
@@ -61,11 +63,11 @@ async function goToRecord() {
 
 const baselineTotals = computed(() => {
   if (!record.value || !period.value) return null
-  const investedBallsDelta = (period.value.startHeldBalls - period.value.endHeldBalls) + (period.value.startRentalBalls - period.value.endRentalBalls)
+  const aggregates = calcRecordAggregates(periodsBeforeThis.value)
   return {
-    totalRotations: record.value.totalRotations - (period.value.endRotations - period.value.startRotations),
-    totalInvestment: record.value.totalInvestment - period.value.investment,
-    totalInvestedBalls: record.value.totalInvestedBalls - investedBallsDelta
+    totalRotations: aggregates.totalRotations,
+    totalInvestment: aggregates.totalInvestment,
+    totalInvestedBalls: aggregates.totalInvestedBalls
   }
 })
 
