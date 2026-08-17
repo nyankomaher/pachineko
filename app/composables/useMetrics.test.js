@@ -407,6 +407,23 @@ describe('useMetrics', () => {
     expect(resultWithCharge[1].investment).toBe(2000)
   })
 
+  it('calcBalance: 最終持玉の換算額から投資額を差し引いて収支を算出する', () => {
+    const { calcBalance } = useMetrics()
+    const result = calcBalance({ finalHeldBalls: 1000, exchangeRate: 3.5, investment: 3000, investedBalls: 500 })
+    expect(result).toBe(Math.round(1000 * 3.5 - (3000 + 500 * 3.5)))
+  })
+
+  it('calcBalance: 投資玉数が負の場合は0未満を切り捨てて算出する', () => {
+    const { calcBalance } = useMetrics()
+    const result = calcBalance({ finalHeldBalls: 500, exchangeRate: 4, investment: 3000, investedBalls: -200 })
+    expect(result).toBe(Math.round(500 * 4 - 3000))
+  })
+
+  it('calcBalance: 小数点以下は四捨五入する', () => {
+    const { calcBalance } = useMetrics()
+    expect(calcBalance({ finalHeldBalls: 100, exchangeRate: 3.55, investment: 0, investedBalls: 0 })).toBe(Math.round(100 * 3.55))
+  })
+
   it('validateRentalBallsForEnd: 区間実績が無ければエラーなし', () => {
     const { validateRentalBallsForEnd } = useMetrics()
     expect(validateRentalBallsForEnd(null)).toBeNull()

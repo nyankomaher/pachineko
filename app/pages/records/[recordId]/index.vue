@@ -201,7 +201,10 @@ const basicInfoInitial = computed(() => (record.value ? {
   exchangeRate: record.value.exchangeRate,
   startTime: record.value.startTime,
   endTime: record.value.endTime,
-  balance: record.value.balance
+  balance: record.value.balance,
+  finalHeldBalls: record.value.finalHeldBalls,
+  totalInvestment: record.value.totalInvestment,
+  totalInvestedBalls: record.value.totalInvestedBalls
 } : null))
 
 const isOwnSession = computed(() => recordingSession.isRecording && recordingSession.recordId === recordId)

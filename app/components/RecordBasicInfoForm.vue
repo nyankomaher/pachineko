@@ -80,15 +80,24 @@
 
     <div class="flex flex-col gap-1">
       <label for="record-balance">収支</label>
-      <InputNumber
-        id="record-balance"
-        v-model="balance"
-        :use-grouping="false"
-        :min-fraction-digits="0"
-        :max-fraction-digits="2"
-        fluid
-        :disabled="recording"
-      />
+      <div class="flex items-center gap-2">
+        <div class="flex-1">
+          <InputNumber
+            id="record-balance"
+            v-model="balance"
+            :use-grouping="false"
+            :min-fraction-digits="0"
+            :max-fraction-digits="2"
+            fluid
+            :disabled="recording"
+          />
+        </div>
+        <Button rounded aria-label="収支を再計算" :disabled="recording" @click="handleRecalculateBalance">
+          <template #icon>
+            <RefreshIcon />
+          </template>
+        </Button>
+      </div>
     </div>
 
     <Button
@@ -111,6 +120,9 @@
 
 <script setup>
 import PlusIcon from '@primevue/icons/plus'
+import RefreshIcon from '@primevue/icons/refresh'
+
+const { calcBalance } = useMetrics()
 
 const props = defineProps({
   initial: { type: Object, default: null },
@@ -208,6 +220,15 @@ async function handleCreateMachine(machineData) {
   } finally {
     creatingMachine.value = false
   }
+}
+
+function handleRecalculateBalance() {
+  balance.value = calcBalance({
+    finalHeldBalls: props.initial?.finalHeldBalls ?? 0,
+    exchangeRate: exchangeRate.value,
+    investment: props.initial?.totalInvestment ?? 0,
+    investedBalls: props.initial?.totalInvestedBalls ?? 0
+  })
 }
 
 const isValid = computed(() => {

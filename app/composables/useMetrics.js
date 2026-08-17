@@ -103,6 +103,10 @@ export function useMetrics() {
     })
   }
 
+  function calcBalance({ finalHeldBalls, exchangeRate, investment, investedBalls }) {
+    return Math.round(finalHeldBalls * exchangeRate - (investment + Math.max(investedBalls, 0) * exchangeRate))
+  }
+
   function validateRentalBallsForEnd(period) {
     if (!period) return null
     const usesPostWin = period.postWinRentalBalls != null
@@ -113,5 +117,5 @@ export function useMetrics() {
       : '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
   }
 
-  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, validateRentalBallsForEnd }
+  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, calcBalance, validateRentalBallsForEnd }
 }

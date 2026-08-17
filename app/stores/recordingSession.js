@@ -24,8 +24,14 @@ export const useRecordingSessionStore = defineStore('recordingSession', {
 
     async finishRecording(recordId) {
       const db = useDb()
+      const { calcBalance } = useMetrics()
       const record = await db.records.get(recordId)
-      const balance = Math.round(record.finalHeldBalls * record.exchangeRate - (record.totalInvestment + Math.max(record.totalInvestedBalls, 0) * record.exchangeRate))
+      const balance = calcBalance({
+        finalHeldBalls: record.finalHeldBalls,
+        exchangeRate: record.exchangeRate,
+        investment: record.totalInvestment,
+        investedBalls: record.totalInvestedBalls
+      })
       await db.records.update(recordId, { endTime: new Date().toISOString(), balance })
       this.end()
     },
