@@ -1,0 +1,1 @@
+function e(){function e(e){return typeof e==`number`?e.toLocaleString(`ja-JP`):String(e??``)}return{formatNumber:e}}export{e as t};

@@ -1,0 +1,1 @@
+var e=[{id:`none`,label:`なし`},{id:`rush`,label:`RUSH`},{id:`normal`,label:`通常`},{id:`charge`,label:`チャージ`}];function t(){function t(t){return e.find(e=>e.id===t)?.label??``}return{winTypes:e,getWinTypeLabel:t}}export{t};

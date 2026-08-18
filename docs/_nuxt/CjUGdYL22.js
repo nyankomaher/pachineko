@@ -1,0 +1,5 @@
+import{P as e,U as t,b as n,j as r,q as i}from"./C8bKil6U.js";import{t as a}from"./czlGUozm.js";import{t as o}from"./C5STy1Vp.js";import{t as s}from"./CRFX5jT62.js";var c=a.extend({name:`radiobuttongroup`,style:`
+    .p-radiobutton-group {
+        display: inline-flex;
+    }
+`,classes:{root:`p-radiobutton-group p-component`}});r();var l={name:`RadioButtonGroup`,extends:{name:`BaseRadioButtonGroup`,extends:s,style:c,provide:function(){return{$pcRadioButtonGroup:this,$parentInstance:this}}},inheritAttrs:!1,data:function(){return{groupName:this.name}},watch:{name:function(e){this.groupName=e||o(`radiobutton-group-`)}},mounted:function(){this.groupName=this.groupName||o(`radiobutton-group-`)}};function u(r,a,o,s,c,l){return t(),n(`div`,e({class:r.cx(`root`)},r.ptmi(`root`)),[i(r.$slots,`default`)],16)}l.render=u;export{l as default};
