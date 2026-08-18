@@ -58,6 +58,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: 'データ管理',
+  description: 'データ・設定のエクスポート・インポートを行います。'
+})
+
 const toast = useToast()
 const exchangeRateOptionsStore = useExchangeRateOptionsStore()
 const recordingSession = useRecordingSessionStore()

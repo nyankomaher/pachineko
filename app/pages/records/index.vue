@@ -96,6 +96,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '実績一覧',
+  description: '記録した実績を一覧で確認できます。'
+})
+
 const route = useRoute()
 const router = useRouter()
 const recordingSession = useRecordingSessionStore()

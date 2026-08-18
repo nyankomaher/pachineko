@@ -151,6 +151,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '実績詳細',
+  description: '実績の詳細を表示・編集します。'
+})
+
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()

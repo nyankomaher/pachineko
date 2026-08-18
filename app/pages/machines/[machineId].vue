@@ -21,6 +21,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '機種詳細',
+  description: '機種の詳細を表示・編集します。'
+})
+
 const route = useRoute()
 const machineId = Number(route.params.machineId)
 const toast = useToast()

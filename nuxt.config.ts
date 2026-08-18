@@ -8,7 +8,14 @@ export default defineNuxtConfig({
   ssr: false,
 
   app: {
-    baseURL: '/pachineko/'
+    baseURL: '/pachineko/',
+    head: {
+      title: 'パチネコ',
+      titleTemplate: '%s - パチネコ',
+      meta: [
+        { name: 'description', content: 'パチンコの遊戯実績を記録、分析するアプリケーション「パチネコ」' }
+      ]
+    }
   },
 
   devServer: {

@@ -6,4 +6,9 @@
 
 <script setup>
 definePageMeta({ fullWidth: true })
+
+useSeoMeta({
+  title: '分析',
+  description: '様々な軸で実績を集計・分析します。'
+})
 </script>

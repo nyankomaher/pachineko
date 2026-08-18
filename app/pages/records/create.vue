@@ -11,6 +11,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '実績を記録',
+  description: '新しい実績の記録を開始します。'
+})
+
 const recordingSession = useRecordingSessionStore()
 const creating = ref(false)
 

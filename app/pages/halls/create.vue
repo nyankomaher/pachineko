@@ -6,6 +6,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '店舗を登録',
+  description: '新しい店舗を登録します。'
+})
+
 const creating = ref(false)
 
 async function handleCreate(hallData) {

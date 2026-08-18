@@ -28,6 +28,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '区間実績詳細',
+  description: '区間実績の詳細を表示・編集します。'
+})
+
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const periodId = Number(route.params.periodId)

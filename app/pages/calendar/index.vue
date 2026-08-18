@@ -62,6 +62,11 @@
 import ChevronLeftIcon from '@primevue/icons/chevronleft'
 import ChevronRightIcon from '@primevue/icons/chevronright'
 
+useSeoMeta({
+  title: '収支カレンダー',
+  description: '月ごとの収支をカレンダー形式で日別に確認できます。'
+})
+
 const route = useRoute()
 const router = useRouter()
 const { formatNumber } = useFormat()

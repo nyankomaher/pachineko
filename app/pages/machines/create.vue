@@ -6,6 +6,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '機種を登録',
+  description: '新しい機種を登録します。'
+})
+
 const creating = ref(false)
 
 async function handleCreate(machineData) {

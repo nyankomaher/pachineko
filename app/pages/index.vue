@@ -54,6 +54,12 @@
 <script setup>
 import { NuxtLink } from '#components'
 
+// TOPページはタイトルテンプレート（「%s - パチネコ」）を適用せず、既定タイトルの「パチネコ」をそのまま使う。
+useHead({ titleTemplate: '%s' })
+useSeoMeta({
+  description: 'パチンコの遊戯実績を記録・分析するアプリ「パチネコ」。記録の開始・再開はここから。'
+})
+
 const recordingSession = useRecordingSessionStore()
 
 const tabs = [

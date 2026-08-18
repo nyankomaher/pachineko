@@ -37,6 +37,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '区間実績を記録',
+  description: '区間実績を記録します。'
+})
+
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()

@@ -21,6 +21,11 @@
 </template>
 
 <script setup>
+useSeoMeta({
+  title: '店舗詳細',
+  description: '店舗の詳細を表示・編集します。'
+})
+
 const route = useRoute()
 const hallId = Number(route.params.hallId)
 const toast = useToast()

@@ -46,6 +46,11 @@
 import draggable from 'vuedraggable'
 import BarsIcon from '@primevue/icons/bars'
 
+useSeoMeta({
+  title: '店舗一覧',
+  description: '登録した店舗を一覧で確認・並び替えできます。'
+})
+
 const halls = ref([])
 
 async function load() {

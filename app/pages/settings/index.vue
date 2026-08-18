@@ -27,6 +27,11 @@
 <script setup>
 import TimesIcon from '@primevue/icons/times'
 
+useSeoMeta({
+  title: '設定',
+  description: '交換レートの選択肢を管理します。'
+})
+
 const store = useExchangeRateOptionsStore()
 const chips = ref(store.options.map((value) => String(value)))
 const saved = ref(false)

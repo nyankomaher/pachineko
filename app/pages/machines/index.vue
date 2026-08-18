@@ -46,6 +46,11 @@
 import draggable from 'vuedraggable'
 import BarsIcon from '@primevue/icons/bars'
 
+useSeoMeta({
+  title: '機種一覧',
+  description: '登録した機種を一覧で確認・並び替えできます。'
+})
+
 const machines = ref([])
 
 async function load() {
