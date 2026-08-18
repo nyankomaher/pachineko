@@ -48,7 +48,16 @@ export default defineNuxtConfig({
   primevue: {
     options: {
       theme: {
-        preset: Aura
+        preset: Aura,
+        options: {
+          // PrimeVueのCSSをネイティブの@layerでラップする。TailwindCSSのユーティリティクラス
+          // （layer化されていない通常のCSS）は、常にlayer化されたCSSより優先されるため、
+          // これによりPrimeVueコンポーネントのスタイル（例: .p-buttonのposition）よりも
+          // Tailwindのユーティリティクラス（例: fixed）が確実に優先されるようにする。
+          // 本番ビルド（generate）でスタイルの注入順序が変わり、PrimeVue側が勝ってしまう
+          // 問題への対策。
+          cssLayer: true
+        }
       }
     }
   },

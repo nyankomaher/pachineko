@@ -1,0 +1,1 @@
+import{U as e,_ as t,b as n,j as r}from"./C8bKil6U.js";import"./34TxDZzX.js";import{r as i}from"./DvhfR5dL.js";r();var a={class:`p-4`},o={__name:`index`,setup(r){return i({title:`分析`,description:`様々な軸で実績を集計・分析します。`}),(r,i)=>(e(),n(`div`,a,[...i[0]||=[t(`h1`,{class:`text-xl font-bold`},`分析`,-1)]]))}};export{o as default};
