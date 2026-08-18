@@ -42,7 +42,7 @@
         v-for="tab in tabs"
         :key="tab.to"
         :to="tab.to"
-        class="rounded px-3 py-2 text-center text-zinc-700 dark:text-zinc-300"
+        class="self-center rounded px-3 py-2 text-zinc-700 dark:text-zinc-300"
         active-class="font-semibold text-[var(--p-primary-color)]"
       >
         {{ tab.label }}

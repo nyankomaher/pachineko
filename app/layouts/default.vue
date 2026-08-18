@@ -44,7 +44,7 @@
           v-for="tab in tabs"
           :key="tab.to"
           :to="tab.to"
-          class="rounded px-3 py-2 text-zinc-700 dark:text-zinc-300"
+          class="self-start rounded px-3 py-2 text-zinc-700 dark:text-zinc-300"
           active-class="font-semibold text-[var(--p-primary-color)]"
           @click="navVisible = false"
         >
