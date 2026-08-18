@@ -17,8 +17,10 @@ export function useDb() {
       records: '++id, hallId, machineId',
       periods: '++id, recordId'
     }).upgrade(async (tx) => {
+      const { migrateToV2 } = useDbMigrations()
       const machines = await tx.table('machines').toArray()
-      await Promise.all(machines.map((machine, index) => tx.table('machines').update(machine.id, { order: index })))
+      const { machines: migrated } = migrateToV2({ machines })
+      await Promise.all(migrated.map((machine) => tx.table('machines').put(machine)))
     })
     db.version(3).stores({
       halls: '++id, name, order',
@@ -26,13 +28,11 @@ export function useDb() {
       records: '++id, hallId, machineId',
       periods: '++id, recordId'
     }).upgrade(async (tx) => {
-      const { calcRecordAggregates } = useMetrics()
+      const { migrateToV3 } = useDbMigrations()
       const records = await tx.table('records').toArray()
-      await Promise.all(records.map(async (record) => {
-        const periods = await tx.table('periods').where('recordId').equals(record.id).sortBy('startTime')
-        const { totalInvestedSavedBalls } = calcRecordAggregates(periods)
-        await tx.table('records').update(record.id, { totalInvestedSavedBalls })
-      }))
+      const periods = await tx.table('periods').toArray()
+      const { records: migrated } = migrateToV3({ records, periods })
+      await Promise.all(migrated.map((record) => tx.table('records').put(record)))
     })
     db.version(4).stores({
       halls: '++id, name, order',
@@ -40,13 +40,11 @@ export function useDb() {
       records: '++id, hallId, machineId',
       periods: '++id, recordId'
     }).upgrade(async (tx) => {
-      const { calcRecordAggregates } = useMetrics()
+      const { migrateToV4 } = useDbMigrations()
       const records = await tx.table('records').toArray()
-      await Promise.all(records.map(async (record) => {
-        const periods = await tx.table('periods').where('recordId').equals(record.id).sortBy('startTime')
-        const { totalBigWinCount } = calcRecordAggregates(periods)
-        await tx.table('records').update(record.id, { totalBigWinCount })
-      }))
+      const periods = await tx.table('periods').toArray()
+      const { records: migrated } = migrateToV4({ records, periods })
+      await Promise.all(migrated.map((record) => tx.table('records').put(record)))
     })
   }
   return db

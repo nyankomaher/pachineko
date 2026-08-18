@@ -8,6 +8,10 @@ export const useExchangeRateOptionsStore = defineStore('exchangeRateOptions', {
     options: [...DEFAULT_OPTIONS]
   }),
 
+  getters: {
+    defaultOptions: () => [...DEFAULT_OPTIONS]
+  },
+
   actions: {
     hydrate() {
       const raw = localStorage.getItem(STORAGE_KEY)

@@ -70,6 +70,7 @@ const tabs = [
   { to: '/analysis/', label: '分析' },
   { to: '/settings/', label: '設定' },
   { to: '/halls/', label: '店舗一覧' },
-  { to: '/machines/', label: '機種一覧' }
+  { to: '/machines/', label: '機種一覧' },
+  { to: '/data/', label: 'データ管理' }
 ]
 </script>
