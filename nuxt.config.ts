@@ -1,6 +1,8 @@
 import { fileURLToPath } from 'node:url'
 import Aura from '@primeuix/themes/aura'
 
+const baseURL = '/pachineko/'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
@@ -8,12 +10,17 @@ export default defineNuxtConfig({
   ssr: false,
 
   app: {
-    baseURL: '/pachineko/',
+    baseURL,
     head: {
       title: 'パチネコ',
       titleTemplate: '%s - パチネコ',
       meta: [
         { name: 'description', content: 'パチンコの遊戯実績を記録、分析するアプリケーション「パチネコ」' }
+      ],
+      // ブラウザは既定でドメイン直下の /favicon.ico を探すため、サブパス配信では
+      // 明示的にbaseURLを含んだhrefでlinkタグを指定しないとfaviconが表示されない。
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: `${baseURL}favicon.ico` }
       ]
     }
   },
