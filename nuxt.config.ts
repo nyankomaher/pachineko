@@ -50,13 +50,19 @@ export default defineNuxtConfig({
       theme: {
         preset: Aura,
         options: {
-          // PrimeVueのCSSをネイティブの@layerでラップする。TailwindCSSのユーティリティクラス
-          // （layer化されていない通常のCSS）は、常にlayer化されたCSSより優先されるため、
-          // これによりPrimeVueコンポーネントのスタイル（例: .p-buttonのposition）よりも
-          // Tailwindのユーティリティクラス（例: fixed）が確実に優先されるようにする。
-          // 本番ビルド（generate）でスタイルの注入順序が変わり、PrimeVue側が勝ってしまう
-          // 問題への対策。
-          cssLayer: true
+          // PrimeVueのCSSをネイティブの@layerでラップする。tailwind-base（Tailwindの
+          // プリフライト/リセット）より後、tailwind-utilities（ユーティリティクラス）より前の
+          // 優先度に置くことで、
+          //   - PrimeVueコンポーネントのスタイル（ボタン・入力欄の色や枠線など）がTailwindの
+          //     リセットに上書きされない（tailwind-base < primevue）
+          //   - Tailwindのユーティリティクラス（例: fixed）はPrimeVueコンポーネントのスタイル
+          //     （例: .p-buttonのposition）より確実に優先される（primevue < tailwind-utilities）
+          // の両方を満たす。assets/css/tailwind.css 側で @tailwind base/utilities を
+          // 同名のlayerで囲んでおり、順序はここと一致させる必要がある。
+          cssLayer: {
+            name: 'primevue',
+            order: 'tailwind-base, primevue, tailwind-utilities'
+          }
         }
       }
     }
