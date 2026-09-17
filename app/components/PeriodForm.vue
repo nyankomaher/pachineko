@@ -19,24 +19,24 @@
       <h2 class="font-semibold">投資・持玉</h2>
       <div class="flex flex-col gap-1">
         <label for="period-investment">投資金額</label>
-        <InputNumber id="period-investment" :model-value="investment" :use-grouping="false" fluid @input="investment = $event.value" />
+        <InputNumber id="period-investment" :model-value="investment" :use-grouping="false" fluid :pt="numericInputPt(v => investment = v)" @input="investment = $event.value" />
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <label for="period-start-held-balls">開始持玉</label>
-          <InputNumber id="period-start-held-balls" :model-value="startHeldBalls" :use-grouping="false" fluid @input="startHeldBalls = $event.value" />
+          <InputNumber id="period-start-held-balls" :model-value="startHeldBalls" :use-grouping="false" fluid :pt="numericInputPt(v => startHeldBalls = v)" @input="startHeldBalls = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
           <label for="period-end-held-balls">終了持玉</label>
-          <InputNumber id="period-end-held-balls" :model-value="endHeldBalls" :use-grouping="false" fluid @input="endHeldBalls = $event.value" />
+          <InputNumber id="period-end-held-balls" :model-value="endHeldBalls" :use-grouping="false" fluid :pt="numericInputPt(v => endHeldBalls = v)" @input="endHeldBalls = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
           <label for="period-start-rental-balls">開始貸玉</label>
-          <InputNumber id="period-start-rental-balls" :model-value="startRentalBalls" :use-grouping="false" fluid @input="startRentalBalls = $event.value" />
+          <InputNumber id="period-start-rental-balls" :model-value="startRentalBalls" :use-grouping="false" fluid :pt="numericInputPt(v => startRentalBalls = v)" @input="startRentalBalls = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
           <label for="period-end-rental-balls">終了貸玉</label>
-          <InputNumber id="period-end-rental-balls" :model-value="endRentalBalls" :use-grouping="false" fluid @input="endRentalBalls = $event.value" />
+          <InputNumber id="period-end-rental-balls" :model-value="endRentalBalls" :use-grouping="false" fluid :pt="numericInputPt(v => endRentalBalls = v)" @input="endRentalBalls = $event.value" />
         </div>
       </div>
     </section>
@@ -46,11 +46,11 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <label for="period-start-rotations">開始回転数</label>
-          <InputNumber id="period-start-rotations" :model-value="startRotations" :use-grouping="false" fluid @input="startRotations = $event.value" />
+          <InputNumber id="period-start-rotations" :model-value="startRotations" :use-grouping="false" fluid :pt="numericInputPt(v => startRotations = v)" @input="startRotations = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
           <label for="period-end-rotations">終了回転数</label>
-          <InputNumber id="period-end-rotations" :model-value="endRotations" :use-grouping="false" fluid @input="endRotations = $event.value" />
+          <InputNumber id="period-end-rotations" :model-value="endRotations" :use-grouping="false" fluid :pt="numericInputPt(v => endRotations = v)" @input="endRotations = $event.value" />
         </div>
       </div>
     </section>
@@ -90,21 +90,21 @@
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <label for="period-continue-count">連荘数</label>
-          <InputNumber id="period-continue-count" :model-value="continueCount" :use-grouping="false" fluid @input="continueCount = $event.value" />
+          <InputNumber id="period-continue-count" :model-value="continueCount" :use-grouping="false" fluid :pt="numericInputPt(v => continueCount = v)" @input="continueCount = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
           <label for="period-won-balls">出玉</label>
-          <InputNumber id="period-won-balls" :model-value="wonBalls" :use-grouping="false" fluid @input="wonBalls = $event.value" />
+          <InputNumber id="period-won-balls" :model-value="wonBalls" :use-grouping="false" fluid :pt="numericInputPt(v => wonBalls = v)" @input="wonBalls = $event.value" />
         </div>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <label for="period-post-win-held-balls">当選後持玉</label>
-          <InputNumber id="period-post-win-held-balls" :model-value="postWinHeldBalls" :use-grouping="false" fluid @input="postWinHeldBalls = $event.value" />
+          <InputNumber id="period-post-win-held-balls" :model-value="postWinHeldBalls" :use-grouping="false" fluid :pt="numericInputPt(v => postWinHeldBalls = v)" @input="postWinHeldBalls = $event.value" />
         </div>
         <div class="flex flex-col gap-1">
           <label for="period-post-win-rental-balls">当選後貸玉</label>
-          <InputNumber id="period-post-win-rental-balls" :model-value="postWinRentalBalls" :use-grouping="false" fluid @input="postWinRentalBalls = $event.value" />
+          <InputNumber id="period-post-win-rental-balls" :model-value="postWinRentalBalls" :use-grouping="false" fluid :pt="numericInputPt(v => postWinRentalBalls = v)" @input="postWinRentalBalls = $event.value" />
         </div>
       </div>
     </section>
@@ -132,6 +132,22 @@ const emit = defineEmits(['submit'])
 const { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen } = useMetrics()
 const { winTypes } = useWinTypes()
 const { formatNumber } = useFormat()
+
+function parseNumericInput(rawValue) {
+  if (rawValue === '' || rawValue == null) return null
+  const parsed = parseInt(rawValue, 10)
+  return Number.isNaN(parsed) ? null : parsed
+}
+
+function numericInputPt(setter) {
+  return {
+    pcInputText: {
+      root: {
+        oninput: (event) => setter(parseNumericInput(event.target.value))
+      }
+    }
+  }
+}
 
 function parseDateTime(value) {
   return value ? new Date(value) : null
