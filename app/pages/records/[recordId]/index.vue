@@ -24,8 +24,8 @@
           <dd class="text-right">{{ formatInvestmentEquation(record.totalInvestment ?? 0, record.totalInvestedBalls ?? 0, totalActualInvestment) }}</dd>
           <dt class="text-zinc-500">出玉</dt>
           <dd class="text-right">{{ formatNumber(record.totalWonBalls) }}玉</dd>
-          <dt class="text-zinc-500">最終持玉</dt>
-          <dd class="text-right">{{ formatNumber(record.finalHeldBalls) }}玉</dd>
+          <dt class="text-zinc-500">持玉収支</dt>
+          <dd class="text-right">{{ formatHeldBallsBalanceEquation(initialHeldBalls, record.finalHeldBalls ?? 0, heldBallsBalance) }}</dd>
           <dt class="text-zinc-500">回転数</dt>
           <dd class="text-right">{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
           <dt class="text-zinc-500">RUSH</dt>
@@ -159,7 +159,7 @@ useSeoMeta({
 const route = useRoute()
 const recordId = Number(route.params.recordId)
 const recordingSession = useRecordingSessionStore()
-const { calcDeemedInvestment, calcRotationsPer1000Yen, calcActualInvestment, calcNetInvestment, formatRotationsPer1000Yen, formatElapsedTime, groupPeriodsByBigWin, validateRentalBallsForEnd } = useMetrics()
+const { calcDeemedInvestment, calcRotationsPer1000Yen, calcActualInvestment, calcNetInvestment, calcInitialHeldBalls, calcHeldBallsBalance, formatRotationsPer1000Yen, formatElapsedTime, groupPeriodsByBigWin, validateRentalBallsForEnd } = useMetrics()
 const { getWinTypeLabel } = useWinTypes()
 const { formatNumber } = useFormat()
 const toast = useToast()
@@ -207,10 +207,22 @@ const basicInfoInitial = computed(() => (record.value ? {
   startTime: record.value.startTime,
   endTime: record.value.endTime,
   balance: record.value.balance,
+  initialHeldBalls: initialHeldBalls.value,
   finalHeldBalls: record.value.finalHeldBalls,
-  totalInvestment: record.value.totalInvestment,
-  totalInvestedSavedBalls: record.value.totalInvestedSavedBalls
+  totalInvestment: record.value.totalInvestment
 } : null))
+
+const initialHeldBalls = computed(() => calcInitialHeldBalls(periods.value))
+
+const heldBallsBalance = computed(() => calcHeldBallsBalance({
+  initialHeldBalls: initialHeldBalls.value,
+  finalHeldBalls: record.value?.finalHeldBalls ?? 0
+}))
+
+function formatHeldBallsBalanceEquation(initial, final, result) {
+  const sign = result > 0 ? '+' : ''
+  return `${formatNumber(initial)}玉 → ${formatNumber(final)}玉 = ${sign}${formatNumber(result)}玉`
+}
 
 const netInvestment = computed(() => calcNetInvestment({
   investment: record.value?.totalInvestment ?? 0,

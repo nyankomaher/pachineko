@@ -548,15 +548,142 @@ describe('useMetrics', () => {
     expect(calcNetInvestment({ investment: 100, investedSavedBalls: 1, exchangeRate: 3.55 })).toBe(104)
   })
 
-  it('calcBalance: 最終持玉の換算額から純投資額を差し引いて収支を算出する', () => {
+  it('calcInitialHeldBalls: 先頭の区間実績の開始持玉を実績の開始持玉とする', () => {
+    const { calcInitialHeldBalls } = useMetrics()
+    const periods = [
+      { startHeldBalls: 10000, endHeldBalls: 9000 },
+      { startHeldBalls: 9000, endHeldBalls: 8750 }
+    ]
+    expect(calcInitialHeldBalls(periods)).toBe(10000)
+  })
+
+  it('calcInitialHeldBalls: 区間実績が無ければ0を返す', () => {
+    const { calcInitialHeldBalls } = useMetrics()
+    expect(calcInitialHeldBalls([])).toBe(0)
+  })
+
+  it('calcHeldBallsBalance: 持玉が減少した場合は負の値になる', () => {
+    const { calcHeldBallsBalance } = useMetrics()
+    expect(calcHeldBallsBalance({ initialHeldBalls: 10000, finalHeldBalls: 8750 })).toBe(-1250)
+  })
+
+  it('calcHeldBallsBalance: 持玉が増加した場合は正の値になる', () => {
+    const { calcHeldBallsBalance } = useMetrics()
+    expect(calcHeldBallsBalance({ initialHeldBalls: 0, finalHeldBalls: 1500 })).toBe(1500)
+  })
+
+  it('calcBalance: 持玉収支の換算額から総投資金額を差し引いて収支を算出する', () => {
     const { calcBalance } = useMetrics()
-    const result = calcBalance({ finalHeldBalls: 1000, exchangeRate: 3.5, netInvestment: 4750 })
-    expect(result).toBe(Math.round(1000 * 3.5 - 4750))
+    expect(calcBalance({ heldBallsBalance: 1000, exchangeRate: 3.5, investment: 3000 })).toBe(500)
+  })
+
+  it('calcBalance: 持玉収支が負の場合は損失として算出する', () => {
+    const { calcBalance } = useMetrics()
+    expect(calcBalance({ heldBallsBalance: -1250, exchangeRate: 3.5, investment: 0 })).toBe(-4375)
   })
 
   it('calcBalance: 小数点以下は四捨五入する', () => {
     const { calcBalance } = useMetrics()
-    expect(calcBalance({ finalHeldBalls: 100, exchangeRate: 3.55, netInvestment: 0 })).toBe(Math.round(100 * 3.55))
+    expect(calcBalance({ heldBallsBalance: 100, exchangeRate: 3.55, investment: 0 })).toBe(355)
+    expect(calcBalance({ heldBallsBalance: 1, exchangeRate: 3.44, investment: 0 })).toBe(3)
+  })
+
+  it('収支: 貯玉10,000から遊技し最終持玉8,750で終了した場合、収支は-4,375になる（不具合の回帰テスト）', () => {
+    const { calcRecordAggregates, calcInitialHeldBalls, calcHeldBallsBalance, calcBalance } = useMetrics()
+    const periods = [
+      {
+        investment: 0,
+        startHeldBalls: 10000,
+        endHeldBalls: 8750,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 250,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      }
+    ]
+    const aggregates = calcRecordAggregates(periods)
+    const heldBallsBalance = calcHeldBallsBalance({
+      initialHeldBalls: calcInitialHeldBalls(periods),
+      finalHeldBalls: aggregates.finalHeldBalls
+    })
+
+    expect(aggregates.finalHeldBalls).toBe(8750)
+    expect(heldBallsBalance).toBe(-1250)
+    expect(calcBalance({ heldBallsBalance, exchangeRate: 3.5, investment: aggregates.totalInvestment })).toBe(-4375)
+  })
+
+  it('収支: 現金投資の後に当選し、当選後持玉で終了した場合は出玉の換算額から投資金額を差し引く', () => {
+    const { calcRecordAggregates, calcInitialHeldBalls, calcHeldBallsBalance, calcBalance } = useMetrics()
+    const periods = [
+      {
+        investment: 10000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 180,
+        winType: 'rush',
+        continueCount: 3,
+        wonBalls: 4500,
+        postWinHeldBalls: 4500,
+        postWinRentalBalls: 0
+      }
+    ]
+    const aggregates = calcRecordAggregates(periods)
+    const heldBallsBalance = calcHeldBallsBalance({
+      initialHeldBalls: calcInitialHeldBalls(periods),
+      finalHeldBalls: aggregates.finalHeldBalls
+    })
+
+    expect(heldBallsBalance).toBe(4500)
+    // 4500 × 4.0 - 10000 = 8000
+    expect(calcBalance({ heldBallsBalance, exchangeRate: 4.0, investment: aggregates.totalInvestment })).toBe(8000)
+  })
+
+  it('収支: 貯玉を使い切った後に現金投資して当選した場合も、開始時の貯玉を差し引いて算出する', () => {
+    const { calcRecordAggregates, calcInitialHeldBalls, calcHeldBallsBalance, calcBalance } = useMetrics()
+    const periods = [
+      {
+        investment: 0,
+        startHeldBalls: 2000,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 0,
+        endRotations: 100,
+        winType: 'none',
+        continueCount: 0,
+        wonBalls: 0
+      },
+      {
+        investment: 5000,
+        startHeldBalls: 0,
+        endHeldBalls: 0,
+        startRentalBalls: 0,
+        endRentalBalls: 0,
+        startRotations: 100,
+        endRotations: 200,
+        winType: 'rush',
+        continueCount: 2,
+        wonBalls: 6000,
+        postWinHeldBalls: 6000,
+        postWinRentalBalls: 0
+      }
+    ]
+    const aggregates = calcRecordAggregates(periods)
+    const heldBallsBalance = calcHeldBallsBalance({
+      initialHeldBalls: calcInitialHeldBalls(periods),
+      finalHeldBalls: aggregates.finalHeldBalls
+    })
+
+    expect(aggregates.totalInvestedSavedBalls).toBe(2000)
+    expect(heldBallsBalance).toBe(4000)
+    // 4000 × 3.5 - 5000 = 9000
+    expect(calcBalance({ heldBallsBalance, exchangeRate: 3.5, investment: aggregates.totalInvestment })).toBe(9000)
   })
 
   it('validateRentalBallsForEnd: 区間実績が無ければエラーなし', () => {

@@ -115,8 +115,16 @@ export function useMetrics() {
     return calcActualInvestment({ investment, investedBalls: investedSavedBalls, exchangeRate })
   }
 
-  function calcBalance({ finalHeldBalls, exchangeRate, netInvestment }) {
-    return Math.round(finalHeldBalls * exchangeRate - netInvestment)
+  function calcInitialHeldBalls(periods) {
+    return periods.length > 0 ? periods[0].startHeldBalls : 0
+  }
+
+  function calcHeldBallsBalance({ initialHeldBalls, finalHeldBalls }) {
+    return finalHeldBalls - initialHeldBalls
+  }
+
+  function calcBalance({ heldBallsBalance, exchangeRate, investment }) {
+    return Math.round(heldBallsBalance * exchangeRate - investment)
   }
 
   function validateRentalBallsForEnd(period) {
@@ -129,5 +137,5 @@ export function useMetrics() {
       : '終了貸玉が0ではないため終了できません。区間実績を修正してください。'
   }
 
-  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, calcNetInvestment, calcBalance, validateRentalBallsForEnd }
+  return { calcDeemedInvestment, calcInvestedBalls, calcActualInvestment, calcRotationsPer1000Yen, formatRotationsPer1000Yen, formatElapsedTime, calcRecordAggregates, groupPeriodsByBigWin, calcNetInvestment, calcInitialHeldBalls, calcHeldBallsBalance, calcBalance, validateRentalBallsForEnd }
 }
