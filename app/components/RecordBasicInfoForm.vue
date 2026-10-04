@@ -81,17 +81,30 @@
     <div class="flex flex-col gap-1">
       <label for="record-balance">収支</label>
       <div class="flex items-center gap-2">
-        <div class="flex-1">
-          <InputNumber
+        <!--
+          iPhone のテンキー（inputmode="numeric"）にはマイナス記号が無いため、入力欄には絶対値のみを入力し、
+          正負は左のボタンで切り替える。InputNumber は iOS のテンキーで値が反映されない（keypress 非発火）ため使わない。
+        -->
+        <InputGroup class="flex-1">
+          <Button
+            :label="balanceSign < 0 ? '−' : '+'"
+            :severity="balanceSign < 0 ? 'danger' : 'info'"
+            outlined
+            class="w-12 shrink-0 text-lg"
+            aria-label="収支の正負を切り替え"
+            :disabled="recording"
+            @click="toggleBalanceSign"
+          />
+          <InputText
             id="record-balance"
-            v-model="balance"
-            :use-grouping="false"
-            :min-fraction-digits="0"
-            :max-fraction-digits="2"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            :model-value="balanceAbs"
             fluid
             :disabled="recording"
+            @update:model-value="handleBalanceInput"
           />
-        </div>
+        </InputGroup>
         <Button rounded aria-label="収支を再計算" :disabled="recording" @click="handleRecalculateBalance">
           <template #icon>
             <RefreshIcon />
@@ -168,7 +181,11 @@ const exchangeRateOptions = computed(() => {
 const exchangeRate = ref(props.initial?.exchangeRate ?? exchangeRateOptions.value[0] ?? null)
 const startTime = ref(props.initial ? parseDateTime(props.initial.startTime) : new Date())
 const endTime = ref(props.initial ? parseDateTime(props.initial.endTime) : null)
-const balance = ref(props.initial?.balance ?? 0)
+const balanceSign = ref(1)
+const balanceAbs = ref('')
+setBalance(props.initial?.balance ?? 0)
+// 入力欄が空欄の場合は0とする
+const balance = computed(() => (balanceAbs.value === '' ? 0 : balanceSign.value * Number(balanceAbs.value) || 0))
 const submitting = ref(false)
 const halls = ref([])
 const machines = ref([])
@@ -222,16 +239,30 @@ async function handleCreateMachine(machineData) {
   }
 }
 
+function setBalance(value) {
+  balanceSign.value = value < 0 ? -1 : 1
+  balanceAbs.value = String(Math.abs(value))
+}
+
+function handleBalanceInput(value) {
+  // テンキー以外（貼り付け等）で入力された数字以外の文字は取り除く
+  balanceAbs.value = (value ?? '').replace(/[^0-9]/g, '')
+}
+
+function toggleBalanceSign() {
+  balanceSign.value = -balanceSign.value
+}
+
 function handleRecalculateBalance() {
   const heldBallsBalance = calcHeldBallsBalance({
     initialHeldBalls: props.initial?.initialHeldBalls ?? 0,
     finalHeldBalls: props.initial?.finalHeldBalls ?? 0
   })
-  balance.value = calcBalance({
+  setBalance(calcBalance({
     heldBallsBalance,
     exchangeRate: exchangeRate.value,
     investment: props.initial?.totalInvestment ?? 0
-  })
+  }))
 }
 
 const isValid = computed(() => {

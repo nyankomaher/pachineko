@@ -162,6 +162,13 @@ describe('実績詳細画面 当選実績・区間実績セクション', () => 
   })
 })
 
+// 収支は「正負切り替えボタン + 絶対値の入力欄」で表示するため、両者を合わせた符号付きの文字列にする
+function displayedBalance(wrapper) {
+  const sign = wrapper.find('button[aria-label="収支の正負を切り替え"]').text()
+  const abs = wrapper.find('#record-balance').element.value
+  return `${sign}${abs}`
+}
+
 describe('実績詳細画面 収支の再計算', () => {
   beforeEach(async () => {
     await resetDb()
@@ -172,14 +179,14 @@ describe('実績詳細画面 収支の再計算', () => {
   async function recalculate(wrapper) {
     await wrapper.find('button[aria-label="収支を再計算"]').trigger('click')
     await settle(wrapper)
-    return wrapper.find('#record-balance input').element.value
+    return displayedBalance(wrapper)
   }
 
   it('持玉収支 × 交換レート - 総投資金額 で収支を再計算する', async () => {
     const { recordId } = await seedRecord({ periods: PERIODS })
     const wrapper = await mountPage(recordId)
     // 持玉収支 = 12500 - 10000 = 2500、2500 × 3.5 - 7000 = 1750
-    expect(await recalculate(wrapper)).toBe('1750')
+    expect(await recalculate(wrapper)).toBe('+1750')
   })
 
   it('開始持玉10,000・最終持玉8,750・交換レート3.5の場合、収支は-4,375になる', async () => {
@@ -188,7 +195,7 @@ describe('実績詳細画面 収支の再計算', () => {
       periods: [{ startHeldBalls: 10000, endHeldBalls: 8750, endRotations: 250 }]
     })
     const wrapper = await mountPage(recordId)
-    expect(await recalculate(wrapper)).toBe('-4375')
+    expect(await recalculate(wrapper)).toBe('−4375')
   })
 
   it('記録中は再計算ボタンを押下できない', async () => {
@@ -196,5 +203,90 @@ describe('実績詳細画面 収支の再計算', () => {
     useRecordingSessionStore().start(recordId)
     const wrapper = await mountPage(recordId)
     expect(wrapper.find('button[aria-label="収支を再計算"]').attributes('disabled')).toBeDefined()
+  })
+})
+
+describe('実績詳細画面 収支の入力', () => {
+  beforeEach(async () => {
+    await resetDb()
+    localStorage.clear()
+    useRecordingSessionStore().end()
+  })
+
+  // 修正ボタンを活性にするため、店舗・機種を登録済みの実績を作成する
+  async function seedEditableRecord(record) {
+    const db = useDb()
+    const hallId = await db.halls.add({ name: '店舗', order: 0 })
+    const machineId = await db.machines.add({ name: '機種', order: 0 })
+    return seedRecord({ record: { hallId, machineId, ...record }, periods: PERIODS })
+  }
+
+  async function submit(wrapper) {
+    await wrapper.findAll('button').find((button) => button.text() === '修正').trigger('click')
+    await settle(wrapper)
+  }
+
+  const signButton = (wrapper) => wrapper.find('button[aria-label="収支の正負を切り替え"]')
+
+  it('入力欄はiPhoneでテンキーが表示されるよう inputmode="numeric" とする', async () => {
+    const { recordId } = await seedRecord({ periods: PERIODS })
+    const wrapper = await mountPage(recordId)
+    expect(wrapper.find('#record-balance').attributes('inputmode')).toBe('numeric')
+  })
+
+  it('保存済みの負の収支は、正負切り替えボタンを「−」、入力欄を絶対値で表示する', async () => {
+    const { recordId } = await seedRecord({ record: { balance: -4375 }, periods: PERIODS })
+    const wrapper = await mountPage(recordId)
+    expect(displayedBalance(wrapper)).toBe('−4375')
+  })
+
+  it('正負切り替えボタンで「−」にして数値を入力し修正すると、負の値で保存する', async () => {
+    const { recordId } = await seedEditableRecord({ balance: 0 })
+    const wrapper = await mountPage(recordId)
+
+    expect(signButton(wrapper).text()).toBe('+')
+    await signButton(wrapper).trigger('click')
+    await wrapper.find('#record-balance').setValue('12500')
+    expect(displayedBalance(wrapper)).toBe('−12500')
+    await submit(wrapper)
+
+    expect((await useDb().records.get(recordId)).balance).toBe(-12500)
+  })
+
+  it('負の収支の正負を切り替えて修正すると、正の値で保存する', async () => {
+    const { recordId } = await seedEditableRecord({ balance: -3000 })
+    const wrapper = await mountPage(recordId)
+
+    await signButton(wrapper).trigger('click')
+    await submit(wrapper)
+
+    expect((await useDb().records.get(recordId)).balance).toBe(3000)
+  })
+
+  it('数字以外の文字は取り除く', async () => {
+    const { recordId } = await seedEditableRecord({ balance: 0 })
+    const wrapper = await mountPage(recordId)
+
+    await wrapper.find('#record-balance').setValue('-1,500')
+    await submit(wrapper)
+
+    expect((await useDb().records.get(recordId)).balance).toBe(1500)
+  })
+
+  it('収支を空欄にして修正すると0として保存する', async () => {
+    const { recordId } = await seedEditableRecord({ balance: -3000 })
+    const wrapper = await mountPage(recordId)
+
+    await wrapper.find('#record-balance').setValue('')
+    await submit(wrapper)
+
+    expect(Object.is((await useDb().records.get(recordId)).balance, 0)).toBe(true)
+  })
+
+  it('記録中は正負切り替えボタンを押下できない', async () => {
+    const { recordId } = await seedRecord({ record: { endTime: null }, periods: PERIODS })
+    useRecordingSessionStore().start(recordId)
+    const wrapper = await mountPage(recordId)
+    expect(signButton(wrapper).attributes('disabled')).toBeDefined()
   })
 })
