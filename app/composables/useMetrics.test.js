@@ -485,6 +485,35 @@ describe('useMetrics', () => {
     expect(result[0].winType).toBe('none')
   })
 
+  it('groupPeriodsByBigWin: チャージを含めない場合、連荘数は合計せず当選した区間の連荘数を使う（チャージの連荘数は無視する）', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    const periods = [
+      { startTime: '2026-08-10T10:00:00.000Z', endTime: '2026-08-10T10:10:00.000Z', investment: 1000, startHeldBalls: 0, endHeldBalls: 0, startRentalBalls: 0, endRentalBalls: 0, startRotations: 0, endRotations: 100, winType: 'charge', continueCount: 2, wonBalls: 600 },
+      { startTime: '2026-08-10T10:10:00.000Z', endTime: '2026-08-10T10:20:00.000Z', investment: 2000, startHeldBalls: 0, endHeldBalls: 0, startRentalBalls: 0, endRentalBalls: 0, startRotations: 100, endRotations: 200, winType: 'rush', continueCount: 3, wonBalls: 4500 },
+      { startTime: '2026-08-10T10:20:00.000Z', endTime: '2026-08-10T10:30:00.000Z', investment: 0, startHeldBalls: 500, endHeldBalls: 0, startRentalBalls: 0, endRentalBalls: 0, startRotations: 0, endRotations: 50, winType: 'charge', continueCount: 4, wonBalls: 1200 }
+    ]
+
+    const result = groupPeriodsByBigWin(periods, false)
+
+    expect(result).toHaveLength(2)
+    // チャージ2連 + RUSH3連 → RUSHの3連のみ（出玉は合計する）
+    expect(result[0]).toMatchObject({ winType: 'rush', continueCount: 3, wonBalls: 5100 })
+    // 大当たりせず終了（末尾はチャージ4連）→ 「なし」で連荘数は0
+    expect(result[1]).toMatchObject({ winType: 'none', continueCount: 0, wonBalls: 1200 })
+  })
+
+  it('groupPeriodsByBigWin: チャージを含める場合、チャージ当選の区間の連荘数を使う', () => {
+    const { groupPeriodsByBigWin } = useMetrics()
+    const periods = [
+      { startTime: '2026-08-10T10:00:00.000Z', endTime: '2026-08-10T10:10:00.000Z', investment: 1000, startHeldBalls: 0, endHeldBalls: 0, startRentalBalls: 0, endRentalBalls: 0, startRotations: 0, endRotations: 100, winType: 'charge', continueCount: 2, wonBalls: 600 },
+      { startTime: '2026-08-10T10:10:00.000Z', endTime: '2026-08-10T10:20:00.000Z', investment: 2000, startHeldBalls: 0, endHeldBalls: 0, startRentalBalls: 0, endRentalBalls: 0, startRotations: 100, endRotations: 200, winType: 'rush', continueCount: 3, wonBalls: 4500 }
+    ]
+
+    const result = groupPeriodsByBigWin(periods, true)
+
+    expect(result.map((group) => [group.winType, group.continueCount])).toEqual([['charge', 2], ['rush', 3]])
+  })
+
   it('groupPeriodsByBigWin: 区間実績が無ければ空配列を返す', () => {
     const { groupPeriodsByBigWin } = useMetrics()
     expect(groupPeriodsByBigWin([])).toEqual([])

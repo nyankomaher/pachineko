@@ -147,6 +147,20 @@ describe('実績詳細画面 当選実績・区間実績セクション', () => 
     ])
   })
 
+  it('当選実績: チャージを含めない場合、チャージの連荘数は無視して当選した区間の連荘数を表示する', async () => {
+    const { recordId } = await seedRecord({
+      periods: [
+        { startTime: '2026-10-04T01:00:00.000Z', investment: 1000, endRotations: 20, winType: 'charge', continueCount: 2, wonBalls: 600 },
+        { startTime: '2026-10-04T01:30:00.000Z', investment: 1000, startRotations: 20, endRotations: 40, winType: 'rush', continueCount: 3, wonBalls: 4500 }
+      ]
+    })
+    const wrapper = await mountPage(recordId)
+    const rows = tableRows(sectionByHeading(wrapper, '当選実績'))
+    // チャージ2連 + RUSH3連 の合計（5連）ではなく、RUSHの3連を表示する
+    expect(rows).toHaveLength(1)
+    expect(rows[0][0]).toEqual(['RUSH', '3連'])
+  })
+
   it('区間実績: 各区間の投資・持玉差分・回転数・1000円あたり回転数・当選を表示する', async () => {
     const { recordId } = await seedRecord({ periods: PERIODS })
     const wrapper = await mountPage(recordId)

@@ -91,11 +91,12 @@ export function useMetrics() {
       const investment = group.reduce((sum, period) => sum + period.investment, 0)
       const investedBalls = group.reduce((sum, period) => sum + calcInvestedBalls(period), 0)
       const rotations = group.reduce((sum, period) => sum + (period.endRotations - period.startRotations), 0)
-      const continueCount = group.reduce((sum, period) => sum + period.continueCount, 0)
       const wonBalls = group.reduce((sum, period) => sum + period.wonBalls, 0)
       const deemedInvestment = investment + investedBalls * 4
       const last = group[group.length - 1]
       const winType = isBigWin(last.winType, includeCharge) ? last.winType : 'none'
+      // 連荘数は「チャージを含める」のON/OFFにかかわらず合計せず、当選した区間（末尾）の連荘数を使う
+      const continueCount = winType === 'none' ? 0 : last.continueCount
 
       return {
         startTime: group[0].startTime,
