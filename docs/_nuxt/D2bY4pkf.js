@@ -1,4 +1,4 @@
-import{P as e,U as t,b as n,j as r,q as i}from"./C8bKil6U.js";import{t as a}from"./czlGUozm.js";import{t as o}from"./FiooIEjL.js";var s=a.extend({name:`inputgroup`,style:`
+import{P as e,Qt as t,U as n,b as r,j as i,q as a}from"./C8bKil6U.js";import{t as o}from"./czlGUozm.js";import{t as s}from"./FiooIEjL.js";var c=o.extend({name:`inputgroup`,style:`
     .p-inputgroup,
     .p-inputgroup .p-iconfield,
     .p-inputgroup .p-floatlabel,
@@ -102,4 +102,4 @@ import{P as e,U as t,b as n,j as r,q as i}from"./C8bKil6U.js";import{t as a}from
     .p-inputgroup .p-iconfield + .p-iconfield .p-inputtext {
         border-inline-start: 0;
     }
-`,classes:{root:`p-inputgroup`}});r();var c={name:`InputGroup`,extends:{name:`BaseInputGroup`,extends:o,style:s,provide:function(){return{$pcInputGroup:this,$parentInstance:this}}},inheritAttrs:!1};function l(r,a,o,s,c,l){return t(),n(`div`,e({class:r.cx(`root`)},r.ptmi(`root`)),[i(r.$slots,`default`)],16)}c.render=l;export{c as default};
+`,classes:{root:`p-inputgroup`}}),l=t({default:()=>u});i();var u={name:`InputGroup`,extends:{name:`BaseInputGroup`,extends:s,style:c,provide:function(){return{$pcInputGroup:this,$parentInstance:this}}},inheritAttrs:!1};function d(t,i,o,s,c,l){return n(),r(`div`,e({class:t.cx(`root`)},t.ptmi(`root`)),[a(t.$slots,`default`)],16)}u.render=d;export{u as n,l as t};
