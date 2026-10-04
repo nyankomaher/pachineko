@@ -129,3 +129,91 @@ describe('PeriodForm リアルタイム計算表示欄', () => {
     expect(calcRowValue(wrapper, '総回転数')).toBe('150回転 (18.8回転)')
   })
 })
+
+describe('PeriodForm 当選セクション', () => {
+  const WIN_FIELD_IDS = ['period-continue-count', 'period-won-balls', 'period-post-win-held-balls', 'period-post-win-rental-balls']
+
+  function winFieldStates(wrapper) {
+    return Object.fromEntries(WIN_FIELD_IDS.map((id) => {
+      const el = wrapper.find(`#${id} input`).element
+      return [id, { value: el.value, disabled: el.disabled }]
+    }))
+  }
+
+  async function selectWinType(wrapper, winType) {
+    wrapper.findComponent({ name: 'Select' }).vm.$emit('update:modelValue', winType)
+    await wrapper.vm.$nextTick()
+    await wrapper.vm.$nextTick()
+  }
+
+  async function submit(wrapper) {
+    const button = wrapper.findAll('button').find((el) => el.text() === '記録')
+    await button.trigger('click')
+    return wrapper.emitted('submit').at(-1)[0]
+  }
+
+  function accordionExpanded(wrapper) {
+    return wrapper.find('.p-accordionheader').attributes('aria-expanded') === 'true'
+  }
+
+  const VALID = { investment: 1000, startRotations: 0, endRotations: 20 }
+
+  it('当選種別が初期値「なし」の場合、連荘数〜当選後貸玉を非活性にし、当選セクションを閉じておく', async () => {
+    const wrapper = await mountForm({ initial: { ...VALID, winType: 'none' } })
+    expect(Object.values(winFieldStates(wrapper)).every((state) => state.disabled)).toBe(true)
+    expect(accordionExpanded(wrapper)).toBe(false)
+  })
+
+  it('当選済みの区間を開いた場合、連荘数〜当選後貸玉を活性にし、当選セクションを開いておく', async () => {
+    const wrapper = await mountForm({
+      initial: { ...VALID, winType: 'rush', continueCount: 3, wonBalls: 4500, postWinHeldBalls: 4500, postWinRentalBalls: 0 }
+    })
+    expect(Object.values(winFieldStates(wrapper)).every((state) => !state.disabled)).toBe(true)
+    expect(accordionExpanded(wrapper)).toBe(true)
+  })
+
+  it('「なし」以外に変更すると活性になり、連荘数は1、当選後持玉・当選後貸玉は0を初期値とする', async () => {
+    const wrapper = await mountForm({ initial: { ...VALID, winType: 'none' } })
+    await selectWinType(wrapper, 'rush')
+
+    expect(winFieldStates(wrapper)).toEqual({
+      'period-continue-count': { value: '1', disabled: false },
+      'period-won-balls': { value: '0', disabled: false },
+      'period-post-win-held-balls': { value: '0', disabled: false },
+      'period-post-win-rental-balls': { value: '0', disabled: false }
+    })
+    expect(await submit(wrapper)).toMatchObject({ winType: 'rush', continueCount: 1, wonBalls: 0, postWinHeldBalls: 0, postWinRentalBalls: 0 })
+  })
+
+  it('「なし」以外の種別どうしで変更した場合は入力済みの値を保持する', async () => {
+    const wrapper = await mountForm({
+      initial: { ...VALID, winType: 'rush', continueCount: 3, wonBalls: 4500, postWinHeldBalls: 4500, postWinRentalBalls: 10 }
+    })
+    await selectWinType(wrapper, 'normal')
+
+    expect(await submit(wrapper)).toMatchObject({ winType: 'normal', continueCount: 3, wonBalls: 4500, postWinHeldBalls: 4500, postWinRentalBalls: 10 })
+  })
+
+  it('「なし」に戻すと連荘数〜当選後貸玉の入力値を破棄して初期値に戻し、非活性にする', async () => {
+    const wrapper = await mountForm({
+      initial: { ...VALID, winType: 'rush', continueCount: 3, wonBalls: 4500, postWinHeldBalls: 4500, postWinRentalBalls: 10 }
+    })
+    await selectWinType(wrapper, 'none')
+
+    expect(winFieldStates(wrapper)).toEqual({
+      'period-continue-count': { value: '0', disabled: true },
+      'period-won-balls': { value: '0', disabled: true },
+      'period-post-win-held-balls': { value: '', disabled: true },
+      'period-post-win-rental-balls': { value: '', disabled: true }
+    })
+    expect(await submit(wrapper)).toMatchObject({ winType: 'none', continueCount: 0, wonBalls: 0, postWinHeldBalls: null, postWinRentalBalls: null })
+  })
+
+  it('記録/修正ボタンは当選セクションの後に1つだけ配置する', async () => {
+    const wrapper = await mountForm({ initial: VALID })
+    const buttons = wrapper.findAll('button').filter((el) => el.text() === '記録')
+    expect(buttons).toHaveLength(1)
+    const accordion = wrapper.find('.p-accordion').element
+    expect(accordion.compareDocumentPosition(buttons[0].element) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+})

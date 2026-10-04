@@ -1,5 +1,6 @@
 <template>
-  <div class="p-4">
+  <div class="p-4 pb-32">
+    <!-- 修正完了のトースト（画面下部中央に表示）が戻る・削除ボタンに重ならないよう、下側に余白を設ける -->
     <h1 class="mb-4 text-xl font-bold">区間実績詳細(区間{{ periodNumber }})</h1>
 
     <PeriodForm

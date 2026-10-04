@@ -74,40 +74,39 @@
       </div>
     </section>
 
-    <Button
-      :label="submitLabel"
-      :loading="loading || submitting"
-      :disabled="!isValid || loading || submitting"
-      @click="handleSubmit"
-    />
-
-    <section class="flex flex-col gap-4">
-      <h2 class="font-semibold">当選</h2>
-      <div class="flex flex-col gap-1">
-        <label for="period-win-type">当選種別</label>
-        <Select id="period-win-type" v-model="winType" :options="winTypes" option-label="label" option-value="id" fluid />
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label for="period-continue-count">連荘数</label>
-          <InputNumber id="period-continue-count" :model-value="continueCount" :use-grouping="false" fluid :pt="numericInputPt(v => continueCount = v)" @input="continueCount = $event.value" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <label for="period-won-balls">出玉</label>
-          <InputNumber id="period-won-balls" :model-value="wonBalls" :use-grouping="false" fluid :pt="numericInputPt(v => wonBalls = v)" @input="wonBalls = $event.value" />
-        </div>
-      </div>
-      <div class="grid grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <label for="period-post-win-held-balls">当選後持玉</label>
-          <InputNumber id="period-post-win-held-balls" :model-value="postWinHeldBalls" :use-grouping="false" fluid :pt="numericInputPt(v => postWinHeldBalls = v)" @input="postWinHeldBalls = $event.value" />
-        </div>
-        <div class="flex flex-col gap-1">
-          <label for="period-post-win-rental-balls">当選後貸玉</label>
-          <InputNumber id="period-post-win-rental-balls" :model-value="postWinRentalBalls" :use-grouping="false" fluid :pt="numericInputPt(v => postWinRentalBalls = v)" @input="postWinRentalBalls = $event.value" />
-        </div>
-      </div>
-    </section>
+    <Accordion v-model:value="openPanels" multiple>
+      <AccordionPanel value="win">
+        <AccordionHeader>当選</AccordionHeader>
+        <AccordionContent>
+          <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-1">
+              <label for="period-win-type">当選種別</label>
+              <Select id="period-win-type" v-model="winType" :options="winTypes" option-label="label" option-value="id" fluid />
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1">
+                <label for="period-continue-count">連荘数</label>
+                <InputNumber id="period-continue-count" :model-value="continueCount" :use-grouping="false" fluid :disabled="isNoWin" :pt="numericInputPt(v => continueCount = v)" @input="continueCount = $event.value" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="period-won-balls">出玉</label>
+                <InputNumber id="period-won-balls" :model-value="wonBalls" :use-grouping="false" fluid :disabled="isNoWin" :pt="numericInputPt(v => wonBalls = v)" @input="wonBalls = $event.value" />
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1">
+                <label for="period-post-win-held-balls">当選後持玉</label>
+                <InputNumber id="period-post-win-held-balls" :model-value="postWinHeldBalls" :use-grouping="false" fluid :disabled="isNoWin" :pt="numericInputPt(v => postWinHeldBalls = v)" @input="postWinHeldBalls = $event.value" />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label for="period-post-win-rental-balls">当選後貸玉</label>
+                <InputNumber id="period-post-win-rental-balls" :model-value="postWinRentalBalls" :use-grouping="false" fluid :disabled="isNoWin" :pt="numericInputPt(v => postWinRentalBalls = v)" @input="postWinRentalBalls = $event.value" />
+              </div>
+            </div>
+          </div>
+        </AccordionContent>
+      </AccordionPanel>
+    </Accordion>
 
     <Button
       :label="submitLabel"
@@ -172,13 +171,22 @@ const wonBalls = ref(props.initial?.wonBalls ?? 0)
 const postWinHeldBalls = ref(props.initial?.postWinHeldBalls ?? null)
 const postWinRentalBalls = ref(props.initial?.postWinRentalBalls ?? null)
 const submitting = ref(false)
+// 当選種別が「なし」以外の既存区間を開いた場合は、入力済みの当選内容が見えるよう当選セクションを展開しておく
+const openPanels = ref(winType.value === 'none' ? [] : ['win'])
+
+const isNoWin = computed(() => winType.value === 'none')
 
 watch(winType, (newType) => {
   if (newType === 'none') {
     continueCount.value = 0
-  } else if ((continueCount.value ?? 0) < 1) {
-    continueCount.value = 1
+    wonBalls.value = 0
+    postWinHeldBalls.value = null
+    postWinRentalBalls.value = null
+    return
   }
+  if ((continueCount.value ?? 0) < 1) continueCount.value = 1
+  if (postWinHeldBalls.value == null) postWinHeldBalls.value = 0
+  if (postWinRentalBalls.value == null) postWinRentalBalls.value = 0
 })
 
 const periodRotations = computed(() => {
