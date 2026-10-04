@@ -120,8 +120,10 @@ npm run test     # Vitestによるテスト実行
   - IndexedDBのラッパーとしてDexie.jsを使用します。
 - デザインシステムとしてPrimeVueを採用します（`@primevue/nuxt-module` 経由で導入）。履歴タブの表（DataTable）、分析タブのグラフ（Chart）を含め、UI全体をPrimeVueのコンポーネントで統一します。
 - github pagesにデプロイします。公開パスは `/pachineko/` とし、`nuxt.config.ts` の `app.baseURL` に設定します。
-  - `npm run generate` の生成物は `docs/` ディレクトリに出力し（`nitro.output.publicDir`）、mainブランチの `/docs` を配信元とするGitHub Pages設定を想定します。
-  - 404.htmlとindex.htmlを同内容にし、下層への直接アクセス時やリロード時にもページが表示されるようにします（`npm run generate` 実行後、`scripts/copy-404.mjs` が `docs/index.html` を `docs/404.html` としてコピーします）。
+  - `npm run generate` の生成物を `docs/` ディレクトリに配置し、mainブランチの `/docs` を配信元とするGitHub Pages設定を想定します。
+    - Nitroの出力先（`nitro.output.publicDir`）は既定の `.output/public` のままとし、`docs/` を指定しないでください。Nitroはビルドのたびに出力先を削除・再作成し、これは `nuxt dev` や `nuxt prepare`（`npm install` の postinstall）でも実行されるため、`docs/` を指定すると開発サーバーの起動等で `docs/` が削除されてしまいます。
+    - `nuxt generate` 実行後、`scripts/publish-docs.mjs` が `.output/public` の内容で `docs/` を置き換えます。
+  - 404.htmlとindex.htmlを同内容にし、下層への直接アクセス時やリロード時にもページが表示されるようにします（`scripts/publish-docs.mjs` が `docs/index.html` を `docs/404.html` としてコピーします）。
   - Jekyllによる `_nuxt/` 等アンダースコア始まりディレクトリの除外を防ぐため、`public/.nojekyll`（空ファイル）を生成物に含めます。
 - TypeScriptは使用せず、Javascriptを使用します。
 - CSSにはTailwindを使用します。
