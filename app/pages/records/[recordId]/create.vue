@@ -13,8 +13,20 @@
       @submit="handleSave"
     />
 
-    <div class="mt-6">
+    <!-- 区間実績詳細(修正)画面と同じ配置にするため、次区間・削除ボタンの位置も領域を確保する -->
+    <div class="mt-6 flex items-center justify-between">
       <Button label="キャンセル" severity="secondary" outlined @click="cancelDialogVisible = true" />
+      <div class="flex gap-2">
+        <Button
+          label="前区間"
+          severity="secondary"
+          outlined
+          :class="{ invisible: !lastPeriodId }"
+          @click="prevDialogVisible = true"
+        />
+        <Button label="次区間" severity="secondary" outlined class="invisible" />
+      </div>
+      <Button label="削除" severity="danger" outlined class="invisible" />
     </div>
 
     <Dialog v-model:visible="continueDialogVisible" modal header="記録中…" :style="{ width: '20rem' }">
@@ -31,6 +43,14 @@
       <template #footer>
         <Button label="いいえ" text @click="cancelDialogVisible = false" />
         <Button label="はい" severity="danger" @click="handleCancel" />
+      </template>
+    </Dialog>
+
+    <Dialog v-model:visible="prevDialogVisible" modal header="キャンセル確認" :style="{ width: '20rem' }">
+      <p>入力内容を破棄して前区間に移動します。よろしいですか？</p>
+      <template #footer>
+        <Button label="いいえ" text @click="prevDialogVisible = false" />
+        <Button label="はい" severity="danger" @click="goToPrev" />
       </template>
     </Dialog>
   </div>
@@ -50,12 +70,14 @@ const { calcRecordAggregates, validateRentalBallsForEnd } = useMetrics()
 const record = ref(null)
 const periodDefaults = ref(null)
 const periodNumber = ref(1)
+const lastPeriodId = ref(null)
 const formKey = ref(0)
 const saving = ref(false)
 const continuing = ref(false)
 const ending = ref(false)
 const continueDialogVisible = ref(false)
 const cancelDialogVisible = ref(false)
+const prevDialogVisible = ref(false)
 const endError = ref('')
 const pendingPeriodData = ref(null)
 
@@ -92,7 +114,14 @@ async function loadDefaults() {
   if (!record.value) return
   const periods = await db.periods.where('recordId').equals(recordId).sortBy('startTime')
   periodNumber.value = periods.length + 1
+  lastPeriodId.value = periods.length > 0 ? periods[periods.length - 1].id : null
   periodDefaults.value = buildDefaults(periods)
+}
+
+async function goToPrev() {
+  prevDialogVisible.value = false
+  if (!lastPeriodId.value) return
+  await navigateTo(`/records/${recordId}/${lastPeriodId.value}`)
 }
 
 const baselineTotals = computed(() => (record.value ? {

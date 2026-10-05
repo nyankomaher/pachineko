@@ -13,8 +13,26 @@
       @submit="handleUpdate"
     />
 
-    <div class="mt-6 flex justify-between">
+    <div class="mt-6 flex items-center justify-between">
       <Button label="戻る" text @click="goToRecord" />
+      <!-- 非表示のボタンも領域を確保し、もう一方のボタンの配置を変えない -->
+      <div class="flex gap-2">
+        <Button
+          label="前区間"
+          severity="secondary"
+          outlined
+          :class="{ invisible: !prevPeriodId }"
+          @click="goToPrev"
+        />
+        <!-- 新区間は修正ボタンと同じデザイン(primary)にする -->
+        <Button
+          :label="nextPeriodId ? '次区間' : '新区間'"
+          :severity="nextPeriodId ? 'secondary' : undefined"
+          :outlined="!!nextPeriodId"
+          :class="{ invisible: !nextPeriodId && !canStartNewPeriod }"
+          @click="goToNext"
+        />
+      </div>
       <Button label="削除" severity="danger" outlined @click="deleteDialogVisible = true" />
     </div>
 
@@ -38,12 +56,15 @@ const route = useRoute()
 const recordId = Number(route.params.recordId)
 const periodId = Number(route.params.periodId)
 const { calcRecordAggregates } = useMetrics()
+const recordingSession = useRecordingSessionStore()
 const toast = useToast()
 
 const record = ref(null)
 const period = ref(null)
 const periodsBeforeThis = ref([])
 const periodNumber = ref(null)
+const prevPeriodId = ref(null)
+const nextPeriodId = ref(null)
 const saving = ref(false)
 const deleteDialogVisible = ref(false)
 
@@ -59,12 +80,32 @@ async function load() {
   const index = periods.findIndex((p) => p.id === periodId)
   periodNumber.value = index === -1 ? null : index + 1
   periodsBeforeThis.value = index === -1 ? [] : periods.slice(0, index)
+  prevPeriodId.value = index > 0 ? periods[index - 1].id : null
+  nextPeriodId.value = index !== -1 && index < periods.length - 1 ? periods[index + 1].id : null
 }
 
 onMounted(load)
 
+// 記録中の実績の最後の区間では、次区間の代わりに新規区間の記録を開始できる
+const canStartNewPeriod = computed(() => (
+  periodNumber.value !== null && !nextPeriodId.value && recordingSession.recordId === recordId
+))
+
 async function goToRecord() {
   await navigateTo(`/records/${recordId}`)
+}
+
+async function goToPrev() {
+  if (!prevPeriodId.value) return
+  await navigateTo(`/records/${recordId}/${prevPeriodId.value}`)
+}
+
+async function goToNext() {
+  if (nextPeriodId.value) {
+    await navigateTo(`/records/${recordId}/${nextPeriodId.value}`)
+  } else if (canStartNewPeriod.value) {
+    await navigateTo(`/records/${recordId}/create`)
+  }
 }
 
 const baselineTotals = computed(() => {
