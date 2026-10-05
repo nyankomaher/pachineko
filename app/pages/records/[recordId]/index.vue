@@ -15,9 +15,11 @@
 
       <section class="flex flex-col gap-2">
         <h2 class="font-semibold">集計</h2>
-        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
+        <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
           <dt class="text-zinc-500">経過時間</dt>
           <dd class="text-right">{{ elapsedTimeLabel }}</dd>
+          <dt class="text-zinc-500">回転数</dt>
+          <dd class="text-right">{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
           <dt class="text-zinc-500">純投資</dt>
           <dd class="text-right">{{ formatInvestmentEquation(record.totalInvestment ?? 0, record.totalInvestedSavedBalls ?? 0, netInvestment) }}</dd>
           <dt class="text-zinc-500">総投資</dt>
@@ -26,8 +28,6 @@
           <dd class="text-right">{{ formatNumber(record.totalWonBalls) }}玉</dd>
           <dt class="text-zinc-500">持玉収支</dt>
           <dd class="text-right">{{ formatHeldBallsBalanceEquation(initialHeldBalls, record.finalHeldBalls ?? 0, heldBallsBalance) }}</dd>
-          <dt class="text-zinc-500">回転数</dt>
-          <dd class="text-right">{{ formatNumber(record.totalRotations) }}回転 ({{ formattedRotationsPer1000Yen }}回転)</dd>
           <dt class="text-zinc-500">RUSH</dt>
           <dd class="text-right">{{ formatNumber(record.rushWinCount) }}</dd>
           <dt class="text-zinc-500">通常</dt>
